@@ -1,0 +1,15 @@
+{
+  "versionCode": 11510,
+  "versionName": "1.15.10",
+  "apk": "https://raw.githubusercontent.com/matisseduffield/bureau-releases/main/Bureau-v1.15.10.apk",
+  "size": 308712,
+  "sha256": "201390e8165ce9a7fd5b254687b53e7fe1b39b256c316c8060109d6a3c01d0e5",
+  "publishedAt": "2026-11-07T12:58:03Z",
+  "notes": [
+    "Tapping the converted amount no longer nudges the amount you typed",
+    "A stray second decimal point no longer multiplies the amount by ten",
+    "Pasting an amount like $12.50 or 12.50 USD now works",
+    "The + − × ÷ keys add to the amount instead of replacing it",
+    "Long amounts stay fully visible with large text"
+  ]
+}

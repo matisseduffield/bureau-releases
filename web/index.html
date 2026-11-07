@@ -1,0 +1,1704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#E8ECE5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1412" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='18 18 72 72'%3E%3Crect x='18' y='18' width='72' height='72' rx='16' fill='%23F4C52E'/%3E%3Cpath d='M42 32v44M30 64l12 12 12-12M66 76V32M54 44l12-12 12 12' fill='none' stroke='%2314211C' stroke-width='6.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bureau">
+<title>Bureau</title>
+<style>
+/* Hanken Grotesk ships with the page (fonts/, SIL OFL) so the app looks the same offline. */
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("fonts/hanken-grotesk-latin.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("fonts/hanken-grotesk-latin-ext.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Layout: one narrow working column. The conversion slip on top, then the trend, then quick amounts. */
+:root {
+  --bg: #E8ECE5;
+  --surface: #F7F8F4;
+  --ink: #14211C;
+  --muted: #5B6861;
+  --faint: #8D9992;
+  --line: #CDD5CC;
+  --accent: #2C53C4;
+  --accent-soft: rgba(44, 83, 196, .08);
+  --accent-ink: #FFFFFF;
+  --up: #1D7548;
+  --down: #B0392D;
+  --warn: #8F5D08;
+  --backdrop: rgba(10, 16, 14, .4);
+  --shadow: rgba(20, 33, 28, .12);
+  --font: "Hanken Grotesk", "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1412;
+    --surface: #18211E;
+    --ink: #E4EAE5;
+    --muted: #8C9992;
+    --faint: #5F6C66;
+    --line: #2E3A35;
+    --accent: #85A2FF;
+    --accent-soft: rgba(133, 162, 255, .10);
+    --accent-ink: #0E1412;
+    --up: #5FC890;
+    --down: #F08476;
+    --warn: #E0AA48;
+    --backdrop: rgba(0, 0, 0, .6);
+    --shadow: rgba(0, 0, 0, .45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1412;
+  --surface: #18211E;
+  --ink: #E4EAE5;
+  --muted: #8C9992;
+  --faint: #5F6C66;
+  --line: #2E3A35;
+  --accent: #85A2FF;
+  --accent-soft: rgba(133, 162, 255, .10);
+  --accent-ink: #0E1412;
+  --up: #5FC890;
+  --down: #F08476;
+  --warn: #E0AA48;
+  --backdrop: rgba(0, 0, 0, .6);
+  --shadow: rgba(0, 0, 0, .45);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  padding-block: calc(28px + env(safe-area-inset-top, 0px)) calc(48px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.wrap { max-width: 600px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+
+/* Top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: -8px; }
+.brand { display: grid; justify-items: start; }
+.mark { margin: 0; font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; }
+/* Rates freshness under the name; tap to refresh */
+.status {
+  position: relative;
+  min-height: 28px; margin: -2px 0 0 -6px; padding: 0 6px;
+  background: none; border: 0;
+  font-size: .8rem; color: var(--muted);
+}
+/* A 44px tap area without spacing the header out. */
+.status::before { content: ""; position: absolute; inset: -8px 0; }
+/* App version, top right; tap to check for updates */
+.version {
+  min-height: 44px; margin-right: -8px; padding: 0 8px;
+  background: none; border: 0;
+  font-size: .82rem; color: var(--muted);
+}
+.version:hover { color: var(--ink); }
+.version[data-state="available"] { color: var(--accent); font-weight: 600; }
+.status:hover { color: var(--ink); }
+
+/* Update card (only inside the app, when a new version is published):
+   icon + title, what's new, then two equal buttons or a progress bar. */
+.update {
+  display: grid; gap: 16px;
+  padding: 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+}
+.update p { margin: 0; }
+.update-head { display: flex; align-items: center; gap: 14px; }
+.update-icon {
+  flex: none; display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+}
+.update-text { min-width: 0; }
+.update-title { font-weight: 600; line-height: 1.3; }
+.update-sub { font-size: .84rem; color: var(--muted); }
+.update-new { display: grid; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+.update-label { font-size: .78rem; font-weight: 500; color: var(--muted); }
+.update-notes { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: .9rem; line-height: 1.4; }
+.update-notes li { position: relative; padding-left: 16px; }
+.update-notes li::before { content: ""; position: absolute; left: 3px; top: .6em; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.update-msg { font-size: .86rem; line-height: 1.45; color: var(--muted); }
+.update-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.update-actions button {
+  min-height: 46px; border-radius: 6px;
+  font-size: .95rem; font-weight: 600;
+}
+.btn-secondary { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.btn-secondary:hover { border-color: var(--muted); }
+.btn-primary { background: var(--accent); border: 1px solid var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { filter: brightness(1.08); }
+.update-progress { display: flex; align-items: center; gap: 12px; min-height: 46px; }
+.update-track { flex: 1; height: 6px; border-radius: 3px; background: var(--accent-soft); overflow: hidden; }
+.update-track span { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width .2s; }
+.update-pct { min-width: 3.2ch; text-align: right; font-size: .86rem; font-weight: 600; }
+
+/* Conversion slip */
+.slip { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.legs { position: relative; }
+.leg {
+  position: relative;
+  display: flex; align-items: center; gap: 16px;
+  min-height: 96px; padding: 18px 22px;
+}
+.leg + .leg { border-top: 1px solid var(--line); }
+/* Currency pickers are plain text with a chevron: the code reads as the label. */
+.pick {
+  flex: none;
+  max-width: 48%; min-height: 52px;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  margin: -4px -8px; padding: 4px 8px;
+  background: none; border: 0; border-radius: 4px;
+  text-align: left;
+}
+.pick:hover .code { color: var(--accent); }
+.pick:active { background: var(--accent-soft); }
+.pick .code {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 1.3rem; font-weight: 600; line-height: 1.2; letter-spacing: .01em;
+}
+.pick .code::after {
+  content: ""; width: 6px; height: 6px; margin-top: -4px;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+}
+.pick .name { max-width: 100%; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leg.tight .pick .name { display: none; }
+.leg.tight { gap: 10px; }
+/* The amount sizes to its text so the muted symbol can sit right beside it. */
+.amount-wrap {
+  flex: 1; min-width: 0;
+  display: flex; justify-content: flex-end; align-items: baseline; gap: 6px;
+  cursor: text;
+}
+.sym { flex: none; font-size: clamp(1.15rem, 5vw, 1.5rem); color: var(--faint); }
+.sym:empty { display: none; }
+.amount-wrap .amount { flex: 0 1 auto; min-width: 1ch; field-sizing: content; }
+@supports not (field-sizing: content) {
+  .sym { display: none; }
+  .amount-wrap .amount { flex: 1; }
+}
+.amount {
+  flex: 1; min-width: 0;
+  padding: 4px 0;
+  border: 0; background: transparent;
+  font-size: clamp(1.9rem, 8vw, 2.6rem); font-weight: 500; line-height: 1.15; letter-spacing: -.02em;
+  text-align: right;
+  caret-color: var(--accent);
+}
+.amount:focus { outline: none; }
+.amount::placeholder { color: var(--faint); }
+.leg:focus-within { box-shadow: inset 2px 0 0 var(--accent); }
+/* So the focus bar follows the slip's rounded corner. */
+.leg:first-child { border-radius: 5px 5px 0 0; }
+.calc {
+  position: absolute; right: 22px; bottom: 8px;
+  font-size: .8rem; color: var(--muted);
+}
+/* The swap button sits over the first row's bottom right, so its sum goes beside it. */
+.leg:first-child .calc { right: 74px; }
+
+.swap {
+  position: absolute; top: 50%; right: 22px; z-index: 2;
+  width: 44px; height: 44px; margin-top: -22px;
+  display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 50%;
+  color: var(--muted);
+  transition: color .12s, border-color .12s;
+}
+.swap:hover { color: var(--accent); border-color: var(--accent); }
+.swap svg { transition: transform .28s cubic-bezier(.2, .7, .2, 1); }
+
+.rateline {
+  position: relative;
+  display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap;
+  padding: 4px 8px 4px 22px;
+  border-top: 1px solid var(--line);
+  font-size: .86rem;
+}
+.rate-main { color: var(--ink); }
+.rate-main b { font-weight: 600; }
+.rate-sub { color: var(--muted); }
+.credit { margin: 0; padding: 0 22px 12px; font-size: .74rem; color: var(--muted); }
+.credit a { color: inherit; }
+.install-hint { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; font-size: .84rem; line-height: 1.35; color: var(--muted); }
+.install-hint button { flex: none; width: 44px; height: 44px; margin: -10px -12px -10px 0; padding: 0; background: none; border: 0; font-size: 1.2rem; color: var(--muted); }
+.foot { font-size: .8rem; color: var(--muted); }
+.legal { display: flex; justify-content: center; gap: 48px; }
+.legal a { padding: 12px 8px; font-size: .84rem; color: var(--muted); text-decoration: none; }
+.fee {
+  margin-left: auto; position: relative;
+  display: flex; align-items: center;
+  color: var(--muted);
+}
+.fee-btn {
+  position: relative;
+  min-height: 44px; padding: 0 30px 0 12px;
+  border: 0; border-radius: 4px; background: transparent;
+  font-size: .86rem; color: inherit;
+}
+.fee-btn:hover { color: var(--ink); }
+.fee-btn.on { color: var(--accent); font-weight: 600; }
+.fee-btn::after {
+  content: ""; position: absolute; right: 14px; top: 50%; pointer-events: none;
+  width: 5px; height: 5px; margin-top: -4px;
+  border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg); transition: transform .15s;
+}
+.fee-btn[aria-expanded="true"]::after { transform: translateY(3px) rotate(-135deg); }
+/* Small panels under the rate line (fee, alert): a label, then compact controls. */
+.pop {
+  position: absolute; top: calc(100% - 4px); z-index: 10;
+  width: 232px; padding: 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 10px 28px var(--shadow);
+  color: var(--ink);
+}
+.fee-menu { right: 4px; }
+.pop-label { margin: 0; font-size: .78rem; font-weight: 500; color: var(--muted); }
+.fee-opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: 7px; background: var(--bg); }
+.fee-opts button {
+  min-height: 38px; border: 0; border-radius: 5px; background: none;
+  font-size: .86rem; color: var(--muted);
+}
+.fee-opts button:hover { color: var(--ink); }
+.fee-opts button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--line); }
+.fee-custom { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .86rem; color: var(--muted); }
+.pop-field {
+  display: flex; align-items: center; gap: 4px;
+  width: 92px; height: 38px; padding: 0 10px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+  color: var(--muted);
+}
+.pop-field:focus-within, .pop-field.on { border-color: var(--accent); }
+.pop-field input {
+  flex: 1; min-width: 0; padding: 0;
+  border: 0; background: none; outline: none;
+  text-align: right; font-size: .9rem; font-weight: 500; color: var(--ink);
+  caret-color: var(--accent);
+}
+.pop-field input::placeholder { color: var(--faint); font-weight: 400; }
+
+/* Rate alert: a bell beside the rate; filled while this pair has an alert. */
+.bell {
+  display: grid; place-items: center;
+  width: 44px; height: 44px; margin: -10px -10px -10px -12px;
+  background: none; border: 0; border-radius: 50%;
+  color: var(--muted);
+}
+.bell:hover { color: var(--ink); }
+.bell.on { color: var(--accent); }
+.bell.on .bell-body { fill: currentColor; }
+.alert-menu { left: 8px; width: 256px; }
+.alert-row { display: flex; gap: 8px; }
+.alert-row .pop-field { flex: 1; width: auto; min-width: 0; }
+.alert-set {
+  min-width: 64px; height: 38px; border: 0; border-radius: 6px;
+  background: var(--accent); color: var(--accent-ink);
+  font-size: .86rem; font-weight: 600;
+}
+.alert-set:hover { filter: brightness(1.08); }
+.alert-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; margin-top: -4px; font-size: .8rem; color: var(--muted); }
+.alert-link { position: relative; padding: 4px 0; border: 0; background: none; font-size: .8rem; font-weight: 600; color: var(--accent); }
+/* Taller to tap than it looks, short of the Set button above. */
+.alert-link::before { content: ""; position: absolute; inset: -8px -8px -12px; }
+
+/* Sections */
+.section { display: grid; gap: 10px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; margin-bottom: -6px; }
+.section h2 { margin: 0; font-size: .95rem; font-weight: 600; line-height: 1.3; }
+.change { margin-left: 8px; font-weight: 600; }
+.change.up { color: var(--up); }
+.change.down { color: var(--down); }
+
+.range { display: flex; margin-right: -10px; }
+.range button {
+  min-width: 44px; min-height: 44px; padding: 0 10px;
+  background: none; border: 0;
+  font-size: .85rem; color: var(--muted);
+}
+.range button:hover { color: var(--ink); }
+.range button[aria-pressed="true"] { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--accent); }
+
+.trend { position: relative; height: 116px; border-bottom: 1px solid var(--line); transition: opacity .2s; }
+.trend.loading { opacity: .35; }
+.trend svg { position: absolute; top: 0; bottom: 0; left: 0; right: 6px; width: calc(100% - 6px); height: 100%; overflow: visible; }
+.trend .line { fill: none; stroke: var(--accent); stroke-width: 1.75; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.trend .end { position: absolute; left: calc(100% - 6px); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--accent); }
+.trend-axis { display: flex; justify-content: space-between; gap: 12px; font-size: .78rem; color: var(--muted); }
+.trend-axis .mid { text-align: center; }
+.trend-axis .mid.active { color: var(--ink); font-weight: 500; }
+.trend { touch-action: pan-y; }
+.trend .probe-line { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -.5px; background: var(--muted); opacity: .5; pointer-events: none; }
+.trend .probe-dot {
+  position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 3px var(--bg); pointer-events: none;
+}
+.empty { padding: 16px 0; font-size: .88rem; color: var(--muted); }
+
+/* Quick amounts */
+.quick { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.quick-col { display: grid; min-width: 0; }
+.quick-col h3 { margin: 0 0 4px; font-size: .8rem; font-weight: 500; color: var(--muted); }
+.quick-col button {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 2px;
+  background: none; border: 0; border-top: 1px solid var(--line);
+  font-size: .9rem; text-align: left;
+}
+.quick-col button span:first-child { color: var(--muted); }
+.quick-col button span:last-child { font-weight: 500; white-space: nowrap; }
+.quick-col button:hover span:last-child { color: var(--accent); }
+.quick-col button:active { background: var(--accent-soft); }
+@media (max-width: 340px) { .quick { grid-template-columns: 1fr; } }
+
+
+/* Operator keys above the phone keyboard (Android's number pad has none) */
+.ops {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 2px max(8px, env(safe-area-inset-right, 0px)) calc(2px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-top: 1px solid var(--line);
+}
+.ops button {
+  position: relative;
+  min-height: 48px; border: 0; border-radius: 6px;
+  background: none; color: var(--ink);
+  font-size: 1.45rem; font-weight: 400; line-height: 1;
+}
+.ops button + button::before {
+  content: ""; position: absolute; left: 0; top: 30%; bottom: 30%;
+  width: 1px; background: var(--line);
+}
+.ops button:active { background: var(--accent-soft); color: var(--accent); }
+
+/* Currency picker */
+dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(600px, calc(100dvh - 64px));
+  padding: 0; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--surface); color: var(--ink);
+}
+dialog[open] { display: flex; flex-direction: column; }
+dialog::backdrop { background: var(--backdrop); }
+/* The picker eases in: a short rise and fade, with the backdrop fading behind it. */
+dialog, dialog::backdrop {
+  transition: opacity .18s ease-out, transform .22s cubic-bezier(.2, .7, .2, 1), overlay .22s allow-discrete, display .22s allow-discrete;
+  opacity: 0;
+}
+dialog { transform: translateY(12px); }
+dialog[open], dialog[open]::backdrop { opacity: 1; transform: none; }
+@starting-style {
+  dialog[open], dialog[open]::backdrop { opacity: 0; }
+  dialog[open] { transform: translateY(12px); }
+}
+.picker-head { display: flex; gap: 4px; padding: 10px 6px 10px 12px; border-bottom: 1px solid var(--line); }
+.picker-head input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--bg);
+}
+.picker-head input:focus { outline: none; border-color: var(--accent); }
+.picker-head button { min-height: 44px; padding: 0 12px; border: 0; background: none; color: var(--muted); font-size: .9rem; }
+.picker-head button:hover { color: var(--ink); }
+.picker-list { list-style: none; margin: 0; padding: 4px 0 12px; overflow-y: auto; overscroll-behavior: contain; }
+.picker-list .group { padding: 14px 16px 4px; font-size: .8rem; font-weight: 500; color: var(--muted); }
+.picker-list button {
+  width: 100%; min-height: 48px;
+  display: grid; grid-template-columns: 48px 1fr 18px; align-items: center; gap: 10px;
+  padding: 0 16px; border: 0; background: none; text-align: left;
+}
+.picker-list button:hover, .picker-list button:focus-visible { background: var(--accent-soft); outline: none; }
+.picker-list button[aria-current="true"] { background: var(--accent-soft); }
+.picker-list .c { font-weight: 600; letter-spacing: .01em; }
+.picker-list .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.picker-list .tick { color: var(--accent); }
+.picker-list .hint { color: var(--muted); }
+
+@media (max-width: 520px) {
+  body { padding-block: calc(12px + env(safe-area-inset-top, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)); }
+  .leg { padding: 16px; gap: 12px; }
+  .calc { right: 16px; }
+  .leg:first-child .calc { right: 68px; }
+  .swap { right: 16px; }
+  .rateline { padding-left: 16px; }
+  .credit { padding-inline: 16px; }
+  .rate-sub { flex-basis: 100%; order: 3; margin-top: -10px; padding-bottom: 8px; }
+  dialog {
+    width: 100%; max-width: none; height: 100dvh; max-height: 100dvh;
+    margin: 0; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); border: 0; border-radius: 0;
+  }
+}
+@media (max-width: 360px) { .rate-sub { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .trend, .swap, .swap svg, dialog, dialog::backdrop { transition: none; }
+  dialog { transform: none; }
+}
+/* iPhones zoom the page into any field under 16px; only iOS matches this. */
+@supports (-webkit-touch-callout: none) {
+  input:not(.amount), select { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="install-hint" id="installHint" hidden><span>Keep Bureau on your iPhone: tap Share, then Add to Home Screen.</span><button type="button" aria-label="Dismiss">×</button></p>
+  <header class="top">
+    <div class="brand">
+      <h1 class="mark">Bureau</h1>
+      <button class="status" id="status" type="button" title="Try to refresh rates" hidden></button>
+    </div>
+    <button class="version" id="version" type="button" title="Check for updates" aria-live="polite" hidden></button>
+  </header>
+
+  <section class="update" id="updateCard" aria-label="App update" hidden>
+    <div class="update-head">
+      <span class="update-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v9M5 8.5 9 12.5l4-4M4 15h10"/></svg>
+      </span>
+      <div class="update-text">
+        <p class="update-title" id="updateTitle">Update available</p>
+        <p class="update-sub" id="updateSub"></p>
+      </div>
+    </div>
+    <div class="update-new" id="updateNew">
+      <p class="update-label">What's new</p>
+      <ul class="update-notes" id="updateNotes"></ul>
+    </div>
+    <p class="update-msg" id="updateMsg" aria-live="polite" hidden></p>
+    <div class="update-progress" id="updateProgress" hidden>
+      <div class="update-track"><span id="updateBar"></span></div>
+      <span class="update-pct" id="updatePct">0%</span>
+    </div>
+    <div class="update-actions" id="updateActions">
+      <button class="btn-secondary" id="updateLater" type="button">Not now</button>
+      <button class="btn-primary" id="updateGo" type="button">Update</button>
+    </div>
+  </section>
+
+  <section class="slip" aria-label="Converter">
+    <div class="legs">
+      <div class="leg">
+        <button class="pick" id="pickFrom" type="button" aria-haspopup="dialog">
+          <span class="code" id="fromCode">USD</span><span class="name" id="fromName">US Dollar</span>
+        </button>
+        <div class="amount-wrap" id="fromWrap"><span class="sym" id="fromSym" aria-hidden="true"></span><input class="amount" id="fromAmount" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="0"></div>
+        <span class="calc" id="fromCalc" hidden></span>
+      </div>
+      <div class="leg">
+        <button class="pick" id="pickTo" type="button" aria-haspopup="dialog">
+          <span class="code" id="toCode">EUR</span><span class="name" id="toName">Euro</span>
+        </button>
+        <div class="amount-wrap" id="toWrap"><span class="sym" id="toSym" aria-hidden="true"></span><input class="amount" id="toAmount" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="0"></div>
+        <span class="calc" id="toCalc" hidden></span>
+      </div>
+      <button class="swap" id="swap" type="button" aria-label="Swap currencies">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2v11M2 10l3 3 3-3M11 14V3M8 6l3-3 3 3"/></svg>
+      </button>
+    </div>
+    <div class="rateline">
+      <span class="rate-main" id="rateMain">Waiting for rates</span>
+      <button class="bell" id="alertBtn" type="button" aria-expanded="false" aria-controls="alertMenu" aria-label="Set a rate alert" hidden>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path class="bell-body" d="M8 2.2a3.6 3.6 0 0 0-3.6 3.6v2.4L3 10.8h10L11.6 8.2V5.8A3.6 3.6 0 0 0 8 2.2Z"/><path d="M6.5 12.8a1.6 1.6 0 0 0 3 0"/></svg>
+      </button>
+      <span class="rate-sub" id="rateSub"></span>
+      <div class="fee" id="feeBox">
+        <button class="fee-btn" id="feeBtn" type="button" aria-expanded="false" aria-controls="feeMenu">No fee</button>
+        <div class="pop fee-menu" id="feeMenu" role="group" aria-label="Bank or card fee" hidden>
+          <p class="pop-label">Bank or card fee</p>
+          <div class="fee-opts" id="feeOpts">
+            <button type="button" data-fee="0">None</button>
+            <button type="button" data-fee="1">1%</button>
+            <button type="button" data-fee="2">2%</button>
+            <button type="button" data-fee="3">3%</button>
+          </div>
+          <label class="fee-custom">
+            <span>Custom</span>
+            <span class="pop-field" id="feeField"><input id="feeCustom" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="0" aria-label="Custom fee in percent"><span aria-hidden="true">%</span></span>
+          </label>
+        </div>
+      </div>
+      <div class="pop alert-menu" id="alertMenu" role="group" aria-label="Rate alert" hidden>
+        <p class="pop-label" id="alertLabel">Notify me when 1 USD reaches</p>
+        <div class="alert-row">
+          <span class="pop-field"><input id="alertTarget" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" aria-label="Target rate"><span id="alertCode" aria-hidden="true">EUR</span></span>
+          <button class="alert-set" id="alertSet" type="button">Set</button>
+        </div>
+        <div class="alert-foot">
+          <span id="alertHint" aria-live="polite"></span>
+          <button class="alert-link" id="alertRemove" type="button" hidden>Remove</button>
+          <button class="alert-link" id="alertAllow" type="button" hidden>Allow</button>
+        </div>
+      </div>
+    </div>
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+    <p class="credit"><a href="https://www.exchangerate-api.com" rel="noreferrer">Rates By Exchange Rate API</a></p>
+  </section>
+
+  <section class="section" id="trendSection">
+    <div class="section-head">
+      <h2>Trend<span class="change" id="trendChange"></span></h2>
+      <div class="range" role="group" aria-label="Trend range" id="range">
+        <button type="button" data-days="7" aria-pressed="false">1W</button>
+        <button type="button" data-days="30" aria-pressed="true">1M</button>
+        <button type="button" data-days="365" aria-pressed="false">1Y</button>
+      </div>
+    </div>
+    <div class="trend" id="trend"></div>
+    <div class="trend-axis" id="trendAxis"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Quick amounts</h2></div>
+    <div class="quick" id="quick"></div>
+  </section>
+
+  <footer class="foot"><nav class="legal" aria-label="Legal"><a href="https://teloone.au/apps/bureau/privacy/" rel="noreferrer">Privacy</a><a href="https://teloone.au/apps/bureau/terms/" rel="noreferrer">Terms</a></nav></footer>
+</main>
+
+<div class="ops" id="ops" hidden>
+  <button type="button" data-op="+" aria-label="Plus">+</button>
+  <button type="button" data-op="−" aria-label="Minus">−</button>
+  <button type="button" data-op="×" aria-label="Times">×</button>
+  <button type="button" data-op="÷" aria-label="Divided by">÷</button>
+</div>
+
+<dialog id="picker" aria-label="Choose a currency">
+  <div class="picker-head">
+    <input id="pickerSearch" type="search" placeholder="Currency or country" autocomplete="off" aria-label="Search currencies">
+    <button type="button" id="pickerClose">Close</button>
+  </div>
+  <ul class="picker-list" id="pickerList"></ul>
+</dialog>
+
+<script src="lib.js"></script>
+<script src="pwa.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const locale = navigator.language || 'en-US';
+  // Coinbase's live rates come first, for currencies and the ten coins. ExchangeRate-API's
+  // daily rates check them, and stand in if Coinbase is down; the daily file, which has
+  // two mirrors, stands in behind that and brings the coins.
+  const LIVE_URL = 'https://api.coinbase.com/v2/exchange-rates?currency=USD';
+  const DAILY_URL = 'https://open.er-api.com/v6/latest/USD';
+  const FILE_URLS = [
+    'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json',
+    'https://latest.currency-api.pages.dev/v1/currencies/usd.min.json',
+  ];
+  const TREND_URL = 'https://api.frankfurter.dev/v1/';
+  const REFRESH_MS = 60_000;
+  const DAILY_REFRESH_MS = 60 * 60_000;
+  const FILE_FRESH_MS = 2 * 24 * 60 * 60_000;
+  const TREND_TTL_MS = 6 * 60 * 60_000;
+  const FETCH_TIMEOUT_MS = 8000;
+
+  const COMMON = ['USD', 'EUR', 'GBP', 'AUD', 'JPY', 'CAD', 'CHF', 'CNY', 'NZD', 'INR', 'SGD', 'HKD'];
+  const { CRYPTO } = BureauLib;
+  const EURO_ZONE = 'AT BE CY DE EE ES FI FR GR HR IE IT LT LU LV MT NL PT SI SK'.split(' ');
+  const REGION_CURRENCY = {
+    US: 'USD', GB: 'GBP', AU: 'AUD', NZ: 'NZD', CA: 'CAD', JP: 'JPY', CN: 'CNY', IN: 'INR', CH: 'CHF',
+    SE: 'SEK', NO: 'NOK', DK: 'DKK', PL: 'PLN', CZ: 'CZK', HU: 'HUF', SG: 'SGD', HK: 'HKD', KR: 'KRW',
+    ZA: 'ZAR', BR: 'BRL', MX: 'MXN', TR: 'TRY', IL: 'ILS', AE: 'AED', SA: 'SAR', TH: 'THB', ID: 'IDR',
+    MY: 'MYR', PH: 'PHP', VN: 'VND', TW: 'TWD'
+  };
+
+  // Always Latin digits, so whatever we write into a field we can parse back.
+  let fmtLocale = locale;
+  try { fmtLocale = new Intl.Locale(locale, { numberingSystem: 'latn' }).toString(); } catch {}
+  const sepParts = new Intl.NumberFormat(fmtLocale).formatToParts(12345.6);
+  const GROUP = (sepParts.find(p => p.type === 'group') || { value: ',' }).value;
+
+  let names = null;
+  try { names = new Intl.DisplayNames([locale], { type: 'currency' }); } catch {}
+  const nameCache = new Map();
+  function nameOf(code) {
+    if (CRYPTO[code]) return CRYPTO[code];
+    let n = nameCache.get(code);
+    if (n === undefined) {
+      try { n = (names && names.of(code)) || code; } catch { n = code; }
+      nameCache.set(code, n);
+    }
+    return n;
+  }
+  let SUPPORTED = null;
+  try { SUPPORTED = new Set(Intl.supportedValuesOf('currency')); } catch {}
+  const isFiat = code => /^[A-Z]{3}$/.test(code) && (SUPPORTED ? SUPPORTED.has(code) : nameOf(code) !== code);
+  const isKnown = code => typeof code === 'string' && (CRYPTO[code] || /^[A-Z]{3}$/.test(code));
+
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem('bureau.' + k)); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem('bureau.' + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ---- state ----
+  let region = '';
+  try { region = new Intl.Locale(locale).maximize().region || ''; } catch { region = (locale.split('-').pop() || '').toUpperCase(); }
+  const home = EURO_ZONE.includes(region) ? 'EUR' : (REGION_CURRENCY[region] || 'USD');
+  const saved = store.get('pair') || {};
+  const state = {
+    from: isKnown(saved.from) ? saved.from : home,
+    to: isKnown(saved.to) ? saved.to : (home === 'USD' ? 'EUR' : 'USD'),
+    edited: 'from',
+    fee: Number(store.get('fee')) || 0,
+    days: [7, 30, 365].includes(store.get('days')) ? store.get('days') : 30,
+    recent: (store.get('recent') || []).filter(isKnown).slice(0, 5),
+    rates: null,        // units per 1 USD: fiat and coins together
+    fiat: null,
+    coins: null,
+    fiatAt: 0,          // when each half dates from: now for live rates, else as published
+    coinAt: 0,
+    dated: {},          // with live rates, the currencies on their daily rate, and its time
+    source: '',         // 'live' | 'daily'
+    fetchedAt: 0,       // when a refresh last worked
+    error: false
+  };
+  if (state.from === state.to) state.to = state.from === 'USD' ? 'EUR' : 'USD';
+  let reference = store.get('daily');     // { fiat, updatedAt, fetchedAt }: ExchangeRate-API's, the yardstick
+  if (!reference || !reference.fiat) reference = null;
+  // Rates saved in the older shape aren't kept: the first refresh replaces them.
+  const cached = store.get('rates');
+  if (cached && cached.v === 2 && cached.fiat && Object.keys(cached.fiat).length) {
+    Object.assign(state, { fiat: cached.fiat, coins: cached.coins || {}, fiatAt: cached.fiatAt || 0, coinAt: cached.coinAt || 0, dated: cached.dated || {}, source: cached.source === 'live' ? 'live' : 'daily', fetchedAt: cached.fetchedAt || 0 });
+    state.rates = { ...state.fiat, ...state.coins };
+  }
+
+  // ---- numbers ----
+  // Pure helpers live in lib.js (tested in CI); these bind them to this locale.
+  const { fractionDigits } = BureauLib;
+  // Coins get decimals to suit their price (see cryptoDigits).
+  const usdPrice = code => (state.rates && state.rates[code] > 0 ? 1 / state.rates[code] : undefined);
+  const amountOpts = (n, code) => BureauLib.amountOpts(n, code, usdPrice(code));
+  const parseNumber = s => BureauLib.parseNumber(s, GROUP);
+  const evaluate = text => BureauLib.evaluate(text, GROUP);
+  // Building a formatter is far slower than using one, and a render formats
+  // dozens of numbers with a handful of option sets, so each set is built once.
+  const formatters = new Map();
+  function nf(opts) {
+    const key = JSON.stringify(opts);
+    let f = formatters.get(key);
+    if (!f) { f = new Intl.NumberFormat(fmtLocale, opts); formatters.set(key, f); }
+    return f;
+  }
+  const dateFormatters = new Map();
+  function df(opts) {
+    const key = JSON.stringify(opts);
+    let f = dateFormatters.get(key);
+    if (!f) { f = new Intl.DateTimeFormat(locale, opts); dateFormatters.set(key, f); }
+    return f;
+  }
+  const fmtAmount = (n, code) => Number.isFinite(n) ? nf(amountOpts(n, code)).format(n) : '';
+  function fmtMoney(n, code, opts) {
+    if (!Number.isFinite(n)) return '–';
+    opts = opts || amountOpts(n, code);
+    if (CRYPTO[code]) return nf(opts).format(n) + ' ' + code;
+    try { return nf({ style: 'currency', currency: code, currencyDisplay: 'narrowSymbol', ...opts }).format(n); }
+    catch { return nf(opts).format(n) + ' ' + code; }
+  }
+  const fmtRate = r => nf(r >= 100 ? { maximumFractionDigits: 2 } : { maximumSignificantDigits: 5 }).format(r);
+
+  // ---- rates ----
+  const rate = (from, to) => (state.rates && state.rates[from] > 0 && state.rates[to] > 0) ? state.rates[to] / state.rates[from] : NaN;
+  const effectiveRate = (from, to) => rate(from, to) * (1 - state.fee / 100);
+
+  async function getJSON(url) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+    try {
+      const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+      if (!res.ok) { const e = new Error('HTTP ' + res.status); e.status = res.status; throw e; }
+      return await res.json();
+    } finally { clearTimeout(timer); }
+  }
+  async function fetchLive() {
+    const json = await getJSON(LIVE_URL);
+    const out = {};
+    for (const [k, v] of Object.entries((json.data && json.data.rates) || {})) {
+      const n = parseFloat(v);
+      if (n > 0) out[k] = n;
+    }
+    if (!out.EUR) throw new Error('Live rates incomplete');
+    out.USD = 1;
+    return out;
+  }
+  async function fetchDaily() {
+    return BureauLib.dailyRates(await getJSON(DAILY_URL), isFiat);
+  }
+  // The first mirror answers unless it's serving an old file; then the newest wins.
+  async function fetchFile() {
+    let best = null;
+    for (const url of FILE_URLS) {
+      try {
+        const file = BureauLib.fileRates(await getJSON(url), isFiat);
+        if (file && (!best || file.updatedAt > best.updatedAt)) best = file;
+      } catch {}
+      if (best && Date.now() - best.updatedAt < FILE_FRESH_MS) break;
+    }
+    return best;
+  }
+
+  let loading = false;
+  async function loadRates() {
+    if (loading) return;
+    loading = true;
+    const attempt = get => get().catch(() => null);
+    const needDaily = !reference || Date.now() - (reference.fetchedAt || 0) > DAILY_REFRESH_MS;
+    const [live, first] = await Promise.all([attempt(fetchLive), needDaily ? attempt(fetchDaily) : null]);
+    // Without Coinbase, every refresh goes on to the other two.
+    const daily = first || (live || needDaily ? null : await attempt(fetchDaily));
+    if (daily) { reference = { ...daily, fetchedAt: Date.now() }; store.set('daily', reference); }
+    const file = !live || !reference ? await attempt(fetchFile) : null;
+    const yardstick = reference || file;
+    const next = live ? BureauLib.liveRates(live, yardstick && yardstick.fiat, isFiat, Date.now(), yardstick && yardstick.updatedAt) : BureauLib.combineRates(state, daily, file);
+    state.error = !!next.offline;
+    if (!next.offline) {
+      const source = live ? 'live' : next.fiatAt > state.fiatAt ? 'daily' : state.source;
+      Object.assign(state, { fiat: next.fiat, coins: next.coins || {}, fiatAt: next.fiatAt, coinAt: next.coinAt, dated: next.dated || {}, source, fetchedAt: Date.now() });
+      state.rates = { ...state.fiat, ...state.coins };
+      store.set('rates', { v: 2, fiat: state.fiat, coins: state.coins, fiatAt: state.fiatAt, coinAt: state.coinAt, dated: state.dated, source, fetchedAt: state.fetchedAt });
+    }
+    loading = false;
+    buildCurrencyList();
+    renderAll();
+    if (trendFailed) renderTrend();
+  }
+
+  // ---- currency list ----
+  // Rebuilt only when the set of currencies changes, not on every refresh.
+  let currencies = [], currencySet = '';
+  const collator = new Intl.Collator(locale);
+  function buildCurrencyList() {
+    if (!state.rates) return;
+    // All ten coins stay listed; one with no rate today says so in the picker.
+    const codes = [...Object.keys(state.fiat || {}).filter(isFiat), ...Object.keys(CRYPTO)];
+    const set = [...codes].sort().join();
+    if (set === currencySet) return;
+    currencySet = set;
+    currencies = codes.sort((a, b) => collator.compare(nameOf(a), nameOf(b)));
+  }
+  buildCurrencyList();
+
+  // ---- render ----
+  // £, $, € and so on; nothing for crypto or where the symbol is just the code.
+  function symbolOf(code) {
+    if (CRYPTO[code]) return '';
+    try {
+      const part = nf({ style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' }).formatToParts(1).find(p => p.type === 'currency');
+      return part && part.value !== code ? part.value : '';
+    } catch { return ''; }
+  }
+
+  function renderPair() {
+    for (const side of ['from', 'to']) {
+      const code = state[side];
+      $(side + 'Code').textContent = code;
+      $(side + 'Name').textContent = nameOf(code);
+      $(side + 'Sym').textContent = symbolOf(code);
+      $('pick' + (side === 'from' ? 'From' : 'To')).setAttribute('aria-label', `${side === 'from' ? 'You have' : 'You get'} ${nameOf(code)}. Change currency`);
+      $(side + 'Amount').setAttribute('aria-label', `Amount in ${nameOf(code)}`);
+    }
+    document.title = `${state.from} → ${state.to} · Bureau`;
+  }
+
+  const field = side => $(side + 'Amount');
+  const other = side => side === 'from' ? 'to' : 'from';
+
+  // Writes only into the field you're not editing, so a refresh never touches what you type.
+  function convert() {
+    const src = state.edited, dst = other(src);
+    const { value, isExpr } = evaluate(field(src).value);
+    const hint = $(src + 'Calc');
+    hint.hidden = !(isExpr && Number.isFinite(value) && value >= 0);
+    if (!hint.hidden) hint.textContent = '= ' + fmtAmount(value, state[src]);
+    $(dst + 'Calc').hidden = true;
+
+    const r = effectiveRate(state.from, state.to);
+    let out = NaN;
+    if (Number.isFinite(value) && value >= 0 && Number.isFinite(r)) out = src === 'from' ? value * r : value / r;
+    field(dst).value = fmtAmount(out, state[dst]);
+    // With no rate there's no answer yet, and a 0 would read like one.
+    field('from').placeholder = field('to').placeholder = Number.isFinite(r) ? '0' : '–';
+    fitAll();
+    store.set('amount', { side: src, value: field(src).value });
+    announce();
+    tellAppPair();
+  }
+
+  let announceTimer = 0;
+  function announce() {
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(() => {
+      const a = field('from').value, b = field('to').value;
+      $('announce').textContent = a && b ? `${a} ${nameOf(state.from)} is ${b} ${nameOf(state.to)}` : '';
+    }, 700);
+  }
+
+  // Long amounts shrink to fit instead of being cut off, though not on an iPhone
+  // below the 16px that stops it zooming into the field.
+  const smallest = CSS.supports('-webkit-touch-callout', 'none') ? 16 : 0;
+  function fit(input, floor = 15) {
+    input.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(input).fontSize);
+    // Safari rounds scrollWidth up, so 1px over isn't over.
+    while (input.scrollWidth > input.clientWidth + 1 && size > floor) {
+      size *= 0.92;
+      input.style.fontSize = Math.max(size, smallest) + 'px';
+    }
+  }
+  // If it still doesn't fit (big text on a small phone), the currency's name gives
+  // up its room so no digit is hidden.
+  function fitLeg(input) {
+    const leg = input.closest('.leg');
+    leg.classList.remove('tight');
+    fit(input);
+    if (input.scrollWidth > input.clientWidth + 1) { leg.classList.add('tight'); fit(input, 10); }
+  }
+  const fitAll = () => { fitLeg(field('from')); fitLeg(field('to')); };
+
+  function renderRateLine() {
+    renderFee();
+    renderBell();
+    const r = rate(state.from, state.to);
+    const main = $('rateMain'), sub = $('rateSub');
+    if (!Number.isFinite(r)) {
+      const missing = [state.from, state.to].filter(c => !(state.rates && state.rates[c] > 0));
+      main.textContent = !state.rates ? (state.error ? 'No rates yet. Check your connection.' : 'Waiting for rates')
+        : `No rate for ${missing.join(' or ')} today`;
+      sub.textContent = '';
+      return;
+    }
+    const eff = effectiveRate(state.from, state.to);
+    main.innerHTML = `1 ${state.from} = <b>${fmtRate(eff)}</b> ${state.to}`;
+    sub.textContent = state.fee ? `Plain rate ${fmtRate(r)}` : `1 ${state.to} = ${fmtRate(1 / r)} ${state.from}`;
+  }
+
+  // ---- fee menu ----
+  const FEE_PRESETS = [0, 1, 2, 3];
+  const MAX_FEE = 20;
+  const fmtPct = n => nf({ maximumFractionDigits: 2 }).format(n);
+  function renderFee() {
+    $('feeBtn').textContent = state.fee ? `${fmtPct(state.fee)}% fee` : 'No fee';
+    $('feeBtn').classList.toggle('on', state.fee > 0);
+    const custom = !FEE_PRESETS.includes(state.fee);
+    for (const b of $('feeOpts').children) b.setAttribute('aria-pressed', String(Number(b.dataset.fee) === state.fee));
+    $('feeField').classList.toggle('on', custom);
+    if (document.activeElement !== $('feeCustom')) $('feeCustom').value = custom ? fmtPct(state.fee) : '';
+  }
+  function setFee(n) {
+    state.fee = Math.round(n * 100) / 100;
+    store.set('fee', state.fee);
+    renderAll();
+  }
+  function openFee() {
+    closeAlert();
+    renderFee();
+    $('feeMenu').hidden = false;
+    $('feeBtn').setAttribute('aria-expanded', 'true');
+    if (!reduceMotion.matches && $('feeMenu').animate) {
+      $('feeMenu').animate(
+        [{ opacity: 0, transform: 'translateY(-4px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+        { duration: 140, easing: 'ease-out' },
+      );
+    }
+    toApp({ type: 'picker', open: true });
+  }
+  function closeFee(refocus) {
+    if ($('feeMenu').hidden) return;
+    $('feeMenu').hidden = true;
+    $('feeBtn').setAttribute('aria-expanded', 'false');
+    renderFee();
+    if (refocus) $('feeBtn').focus();
+    toApp({ type: 'picker', open: false });
+  }
+
+  // ---- rate alerts (in the app only) ----
+  // The app keeps the alerts and checks them in the background; the page
+  // holds a copy for the bell and the panel. One alert per pair, on the plain
+  // rate; its direction comes from the target vs the rate now.
+  let alerts = [], notifyOn = true;
+  const alertFor = (from, to) => alerts.find(a => a.from === from && a.to === to);
+  function renderBell() {
+    const a = alertFor(state.from, state.to);
+    $('alertBtn').classList.toggle('on', !!a);
+    $('alertBtn').setAttribute('aria-label', a ? `Rate alert at ${fmtRate(a.target)} ${state.to}. Change` : 'Set a rate alert');
+  }
+  function renderAlertHint() {
+    const r = rate(state.from, state.to), a = alertFor(state.from, state.to);
+    const t = parseNumber($('alertTarget').value.trim());
+    let text = '';
+    if (!notifyOn) text = 'Notifications are off';
+    else if (Number.isFinite(t) && t > 0 && Number.isFinite(r)) {
+      const diff = (t / r - 1) * 100;
+      const where = Math.abs(diff) < 0.01 ? "That's the rate now" : `${fmtPct(Math.abs(diff))}% ${diff > 0 ? 'above' : 'below'} now`;
+      text = a && Math.abs(t / a.target - 1) < 1e-9 ? `Set · ${where.toLowerCase()}` : where;
+    } else if (Number.isFinite(r)) text = `Now ${fmtRate(r)}`;
+    $('alertHint').textContent = text;
+    $('alertAllow').hidden = notifyOn;
+    $('alertRemove').hidden = !notifyOn || !a;
+  }
+  function openAlert() {
+    closeFee();
+    const a = alertFor(state.from, state.to), r = rate(state.from, state.to);
+    $('alertLabel').textContent = `Notify me when 1 ${state.from} reaches`;
+    $('alertCode').textContent = state.to;
+    $('alertTarget').value = a ? fmtRate(a.target) : (Number.isFinite(r) ? fmtRate(r) : '');
+    renderAlertHint();
+    $('alertMenu').hidden = false;
+    $('alertBtn').setAttribute('aria-expanded', 'true');
+    if (!reduceMotion.matches && $('alertMenu').animate) {
+      $('alertMenu').animate(
+        [{ opacity: 0, transform: 'translateY(-4px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+        { duration: 140, easing: 'ease-out' },
+      );
+    }
+    $('alertTarget').focus();
+    $('alertTarget').select();
+    toApp({ type: 'picker', open: true });
+  }
+  function closeAlert(refocus) {
+    if ($('alertMenu').hidden) return;
+    $('alertMenu').hidden = true;
+    $('alertBtn').setAttribute('aria-expanded', 'false');
+    if (refocus) $('alertBtn').focus();
+    toApp({ type: 'picker', open: false });
+  }
+  function setAlert() {
+    const t = parseNumber($('alertTarget').value.trim()), r = rate(state.from, state.to);
+    if (!(t > 0) || !Number.isFinite(r) || Math.abs(t / r - 1) < 1e-4) {
+      if (t > 0 && Number.isFinite(r)) $('alertHint').textContent = 'Pick a rate above or below now';
+      return $('alertTarget').focus();
+    }
+    const alert = { from: state.from, to: state.to, target: t, above: t > r };
+    alerts = [...alerts.filter(a => a.from !== alert.from || a.to !== alert.to), alert];
+    toApp({ type: 'setAlert', ...alert });
+    haptic();
+    closeAlert(true);
+    renderBell();
+  }
+  function removeAlert() {
+    alerts = alerts.filter(a => a.from !== state.from || a.to !== state.to);
+    toApp({ type: 'removeAlert', from: state.from, to: state.to });
+    haptic('tick');
+    closeAlert(true);
+    renderBell();
+  }
+
+  // "14:05" today, otherwise "2 Nov, 14:05".
+  function whenText(ms) {
+    const d = new Date(ms);
+    const time = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    return d.toDateString() === new Date().toDateString()
+      ? time
+      : `${d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })}, ${time}`;
+  }
+  // The day a daily rate is for, as its source dates it. Sources date by UTC,
+  // so this does too, and "6 Nov" reads the same everywhere.
+  const dayText = ms => new Date(ms).toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  // The pair's own date: a coin can be a day behind the currencies, or the
+  // other way round, and the older side is the honest one to show.
+  const pairAt = () => BureauLib.pairUpdatedAt(state.from, state.to, state.fiatAt, state.coinAt, state.dated);
+  // Rates are saved on the device after every refresh, so the app keeps
+  // working offline. This line always says how old the rates in use are,
+  // and a pair on a daily rate never reads as live.
+  function renderStatus() {
+    const el = $('status');
+    let text = '';
+    if (!state.rates) text = state.error ? 'Offline · no saved rates yet' : '';
+    else {
+      const { kind, at, byDay } = BureauLib.rateStatus(state, Number.isFinite(rate(state.from, state.to)), Date.now());
+      const when = byDay ? dayText(at) : whenText(at);
+      text = {
+        offline: `Offline · rates from ${when}`,
+        daily: `Daily rates from ${when}`,
+        dailyPair: `Daily rate from ${when}`,
+        stale: `Rates from ${when}`,
+        live: `Live · ${when}`,
+      }[kind];
+    }
+    el.textContent = text;
+    el.hidden = !text;
+  }
+
+  // ---- quick amounts ----
+  function quickAmounts(code) {
+    const usdValue = state.rates && state.rates[code] ? 1 / state.rates[code] : 1;
+    const k = Math.round(Math.log10(usdValue));
+    const mult = Math.abs(k) >= 2 ? Math.pow(10, -k) : 1;
+    return [1, 5, 10, 20, 50, 100, 200, 500, 1000].map(a => a * mult);
+  }
+  function quickColumn(from, to) {
+    const col = document.createElement('div');
+    col.className = 'quick-col';
+    const h = document.createElement('h3');
+    h.textContent = `${from} → ${to}`;
+    col.append(h);
+    const r = effectiveRate(from, to);
+    for (const a of quickAmounts(from)) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      const left = document.createElement('span');
+      left.textContent = fmtMoney(a, from, Number.isInteger(a) ? { maximumFractionDigits: 0 } : undefined);
+      const right = document.createElement('span');
+      right.textContent = Number.isFinite(r) ? fmtMoney(a * r, to) : '–';
+      b.append(left, right);
+      b.setAttribute('aria-label', `Use ${left.textContent}, ${right.textContent}`);
+      b.addEventListener('click', () => {
+        haptic();
+        if (from !== state.from) swap();
+        state.edited = 'from';
+        field('from').value = fmtAmount(a, state.from);
+        convert();
+      });
+      col.append(b);
+    }
+    return col;
+  }
+  function renderQuick() {
+    $('quick').replaceChildren(quickColumn(state.from, state.to), quickColumn(state.to, state.from));
+  }
+
+  // ---- trend ----
+  // Trend series are kept on the device (the last few pairs and ranges), so
+  // the chart draws at once on launch and refreshes quietly behind it.
+  const trendCache = new Map(Object.entries(store.get('trend') || {}).filter(([, e]) => e && Array.isArray(e.series)));
+  function saveTrend(key, entry) {
+    // Six significant digits is finer than the chart can show and keeps the stored copy small.
+    entry.series = entry.series.map(([d, v]) => [d, Number(v.toPrecision(6))]);
+    trendCache.delete(key);
+    trendCache.set(key, entry);
+    while (trendCache.size > 8) trendCache.delete(trendCache.keys().next().value);
+    store.set('trend', Object.fromEntries(trendCache));
+  }
+  let trendToken = 0;
+  let trendFailed = false;
+  function renderRange() {
+    for (const b of $('range').querySelectorAll('button')) b.setAttribute('aria-pressed', String(Number(b.dataset.days) === state.days));
+  }
+  async function renderTrend() {
+    const token = ++trendToken;
+    const { from, to, days } = state;
+    renderRange();
+    const key = `${from}${to}${days}`;
+    let entry = trendCache.get(key);
+    const usable = entry && entry.series.length >= 2;
+    if (usable) drawTrend(entry.series, key);
+    if (usable && Date.now() - entry.at < TREND_TTL_MS) return;
+    if (!usable) $('trend').classList.add('loading');
+    try {
+      entry = { at: Date.now(), series: await fetchSeries(from, to, days) };
+      saveTrend(key, entry);
+    } catch {
+      if (token !== trendToken) return;
+      trendFailed = true;
+      if (usable) return; // keep showing the saved chart
+      return showTrendEmpty("Couldn't load the trend. It will try again with the next rate update.");
+    }
+    if (token !== trendToken) return;
+    trendFailed = false;
+    if (entry.series.length < 2) return showTrendEmpty(`No history yet for ${from} → ${to}.`);
+    drawTrend(entry.series, key);
+  }
+
+  // Daily ECB reference rates where they exist (one request, every working
+  // day). Crypto and the currencies the ECB doesn't cover come from daily
+  // snapshots of all rates instead, sampled across the range.
+  async function fetchSeries(from, to, days) {
+    if (!CRYPTO[from] && !CRYPTO[to]) {
+      const start = new Date(Date.now() - (days + 1) * 864e5);
+      try {
+        const json = await getJSON(`${TREND_URL}${start.toISOString().slice(0, 10)}..?base=${from}&symbols=${to}`);
+        const series = Object.entries(json.rates || {}).map(([d, v]) => [d, v[to]]).filter(p => Number.isFinite(p[1]));
+        if (series.length >= 2) return series;
+      } catch (e) {
+        if (e.status !== 404 && e.status !== 422) throw e;
+      }
+    }
+    const dates = BureauLib.sampleDates(days, new Date());
+    const snaps = await Promise.all(dates.map(d => dayRates(d).catch(() => null)));
+    if (!snaps.some(Boolean)) throw new Error('No snapshots');
+    return BureauLib.crossSeries(dates, snaps, from, to);
+  }
+  // Past days never change, so each day's file is fetched once and kept in
+  // the browser cache; two mirrors of the same files.
+  const SNAPSHOT_URLS = [
+    d => `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${d}/v1/currencies/usd.min.json`,
+    d => `https://${d}.currency-api.pages.dev/v1/currencies/usd.min.json`,
+  ];
+  const dayCache = new Map();
+  function dayRates(date) {
+    if (!dayCache.has(date)) {
+      const load = (async () => {
+        for (const url of SNAPSHOT_URLS) {
+          try {
+            // AbortSignal.timeout is missing on older WebViews; there the request simply runs on.
+            const signal = AbortSignal.timeout ? AbortSignal.timeout(FETCH_TIMEOUT_MS) : undefined;
+            const res = await fetch(url(date), { cache: 'force-cache', signal });
+            if (res.ok) return await res.json();
+          } catch {}
+        }
+        throw new Error('Snapshot unavailable');
+      })();
+      load.catch(() => dayCache.delete(date));
+      dayCache.set(date, load);
+    }
+    return dayCache.get(date);
+  }
+  // A new pair or range fades in; a quiet refresh of the same chart doesn't.
+  let drawnKey = '';
+  function drawTrend(series, key) {
+    const el = $('trend');
+    el.classList.remove('loading');
+    const fresh = key !== drawnKey;
+    drawnKey = key;
+    const vals = series.map(p => p[1]);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const span = max - min || max * 0.001;
+    const W = 300, H = 116, pad = 10;
+    const x = i => (i / (vals.length - 1)) * W;
+    const y = v => pad + (1 - (v - min) / span) * (H - pad * 2);
+    const line = 'M' + vals.map((v, i) => `${x(i).toFixed(2)},${y(v).toFixed(2)}`).join(' L');
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+        <path class="line" d="${line}"/>
+      </svg><span class="end" style="top:${(y(vals.at(-1)) / H * 100).toFixed(2)}%"></span>
+      <span class="probe-line" hidden></span><span class="probe-dot" hidden></span>`;
+    if (fresh && !reduceMotion.matches && el.animate) {
+      el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: 'ease-out' });
+    }
+    const change = (vals.at(-1) / vals[0] - 1) * 100;
+    const changeEl = $('trendChange');
+    changeEl.className = 'change ' + (change >= 0 ? 'up' : 'down');
+    changeEl.textContent = `${change >= 0 ? '+' : '−'}${Math.abs(change).toFixed(2)}%`;
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', `${state.from} to ${state.to}: ${fmtRate(vals[0])} to ${fmtRate(vals.at(-1))}, low ${fmtRate(min)}, high ${fmtRate(max)}`);
+    const long = state.days > 60;
+    const d = s => df(long ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short' }).format(new Date(s + 'T00:00:00'));
+    $('trendAxis').innerHTML = '';
+    for (const [cls, text] of [['', d(series[0][0])], ['mid', `Low ${fmtRate(min)} · High ${fmtRate(max)}`], ['', d(series.at(-1)[0])]]) {
+      const s = document.createElement('span');
+      if (cls) s.className = cls;
+      s.textContent = text;
+      $('trendAxis').append(s);
+    }
+    scrub = { series, y, H, rest: `Low ${fmtRate(min)} · High ${fmtRate(max)}` };
+  }
+
+  // Touch or hover the chart to read the rate on a given day. The reading
+  // replaces the low/high line under the chart until you let go.
+  let scrub = null;
+  function scrubAt(clientX) {
+    const el = $('trend');
+    if (!scrub || !el.querySelector('svg')) return;
+    const rect = el.getBoundingClientRect();
+    const width = rect.width - 6;
+    const n = scrub.series.length;
+    const i = Math.round(Math.max(0, Math.min(1, (clientX - rect.left) / width)) * (n - 1));
+    const [date, value] = scrub.series[i];
+    const left = (i / (n - 1)) * width;
+    const top = scrub.y(value) / scrub.H * 100;
+    const lineEl = el.querySelector('.probe-line'), dot = el.querySelector('.probe-dot');
+    lineEl.hidden = dot.hidden = false;
+    lineEl.style.left = left + 'px';
+    dot.style.left = left + 'px';
+    dot.style.top = top + '%';
+    const mid = $('trendAxis').querySelector('.mid');
+    if (mid) {
+      mid.classList.add('active');
+      const day = df(state.days > 60 ? { day: 'numeric', month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short' }).format(new Date(date + 'T00:00:00'));
+      mid.textContent = `${day} · ${fmtRate(value)}`;
+    }
+  }
+  function endScrub() {
+    const el = $('trend');
+    el.querySelectorAll('.probe-line, .probe-dot').forEach(p => { p.hidden = true; });
+    const mid = $('trendAxis').querySelector('.mid');
+    if (mid && scrub) { mid.classList.remove('active'); mid.textContent = scrub.rest; }
+  }
+  $('trend').addEventListener('pointerdown', e => scrubAt(e.clientX));
+  $('trend').addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) scrubAt(e.clientX); });
+  for (const type of ['pointerup', 'pointerleave', 'pointercancel']) $('trend').addEventListener(type, endScrub);
+
+  function showTrendEmpty(msg) {
+    scrub = null;
+    drawnKey = '';
+    const el = $('trend');
+    el.classList.remove('loading');
+    el.removeAttribute('role');
+    el.removeAttribute('aria-label');
+    el.innerHTML = '<div class="empty"></div>';
+    el.firstChild.textContent = msg;
+    $('trendChange').textContent = '';
+    $('trendAxis').innerHTML = '';
+  }
+
+  function renderAll() {
+    renderPair();
+    convert();
+    renderRateLine();
+    renderStatus();
+    renderQuick();
+  }
+
+  // ---- Android app bridge (absent in a browser) ----
+  // The app injects window.bureauApp for its own origin only. It uses the pair
+  // for the home-screen widget, the picker state for the Back gesture, and
+  // answers with its version and update checks.
+  const app = window.bureauApp || null;
+  function toApp(msg) {
+    if (!app) return;
+    try { app.postMessage(JSON.stringify(msg)); } catch {}
+  }
+  // A light vibration on taps, as native Android controls give: "tick" for
+  // small steps (keys, ranges), "tap" for actions. Follows the phone's
+  // touch feedback setting.
+  const haptic = (kind = 'tap') => toApp({ type: 'haptic', kind });
+  let pairTimer = 0;
+  function tellAppPair() {
+    if (!app) return;
+    clearTimeout(pairTimer);
+    pairTimer = setTimeout(() => {
+      const r = rate(state.from, state.to);
+      // The home-screen widget shows the "You have" amount (1 shows the plain rate).
+      const amount = evaluate(field('from').value).value;
+      if (Number.isFinite(r)) toApp({ type: 'pair', from: state.from, to: state.to, fee: state.fee, rate: r, updatedAt: pairAt(), amount: amount > 0 ? amount : 1 });
+    }, 400);
+  }
+  if (app) {
+    app.onmessage = e => {
+      let m;
+      try { m = JSON.parse(e.data); } catch { return; }
+      if (m.type === 'info') {
+        appVersion = m.version;
+        selfUpdates = m.updates === true;
+        $('version').disabled = !selfUpdates;
+        if (!selfUpdates) $('version').removeAttribute('title');
+        $('version').hidden = false;
+        // Right after an update installs, confirm it for a few seconds.
+        const seen = store.get('seenVersion');
+        store.set('seenVersion', appVersion);
+        if (selfUpdates && !updateReady && seen && seen !== appVersion) {
+          showVersion(`Updated to v${appVersion}`, 'available');
+          versionTimer = setTimeout(() => showVersion(`v${appVersion}`), 4000);
+        } else if (!updateReady) {
+          showVersion(`v${appVersion}`);
+        }
+      } else if (m.type === 'updateStatus' && selfUpdates) {
+        if (m.state === 'available') return markUpdateReady();
+        showVersion(m.state === 'latest' ? 'Up to date' : "Couldn't check");
+        versionTimer = setTimeout(() => showVersion(`v${appVersion}`), 2500);
+      } else if (m.type === 'alerts') {
+        alerts = Array.isArray(m.list) ? m.list.filter(a => a && isKnown(a.from) && isKnown(a.to) && a.target > 0) : [];
+        notifyOn = m.notify !== false;
+        renderBell();
+        if (!$('alertMenu').hidden) renderAlertHint();
+      } else if (m.type === 'showPair') {
+        // Opened from an alert's notification.
+        if (isKnown(m.from) && isKnown(m.to) && m.from !== m.to) {
+          state.from = m.from;
+          state.to = m.to;
+          savePair();
+          renderAll();
+          renderTrend();
+        }
+      } else if (m.type === 'update' && selfUpdates) {
+        if (m.state === 'available') markUpdateReady();
+        showUpdate(m);
+      }
+    };
+    $('updateGo').addEventListener('click', () => {
+      showUpdate({ state: 'downloading', progress: 0 });
+      toApp({ type: 'installUpdate' });
+    });
+    $('updateLater').addEventListener('click', () => { $('updateCard').hidden = true; });
+    $('alertBtn').hidden = false;
+    // Tapping the version checks for updates; once one is known it reopens the card.
+    $('version').addEventListener('click', () => {
+      if (updateReady && $('updateCard').hidden) {
+        $('updateCard').hidden = false;
+        scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (updateReady) return;
+      showVersion('Checking…');
+      toApp({ type: 'checkUpdate' });
+    });
+  }
+
+  // ---- version, top right ----
+  // selfUpdates is off until the app says otherwise: Play builds update through
+  // the store, so there the version is a plain label with nothing to tap.
+  let appVersion = '', selfUpdates = false, updateReady = false, versionTimer = 0;
+  function showVersion(text, state) {
+    clearTimeout(versionTimer);
+    $('version').textContent = text;
+    $('version').dataset.state = state || '';
+  }
+  function markUpdateReady() {
+    updateReady = true;
+    showVersion('Update available', 'available');
+  }
+
+  // The update card. The app sends: available (version, notes, size),
+  // downloading (progress 0..1), installing, and failed (message).
+  let updateVersion = '', updateSize = 0;
+  function showUpdate(m) {
+    const show = (id, on) => { $(id).hidden = !on; };
+    $('updateCard').hidden = false;
+    if (m.state === 'available') {
+      updateVersion = m.version || updateVersion;
+      updateSize = m.size > 0 ? m.size : updateSize;
+      const notes = Array.isArray(m.notes) ? m.notes.filter(n => typeof n === 'string' && n).slice(0, 5) : [];
+      $('updateNotes').replaceChildren(...notes.map(n => { const li = document.createElement('li'); li.textContent = n; return li; }));
+      show('updateNew', notes.length > 0);
+    }
+    const sub = [`Bureau ${updateVersion}`, updateSize ? `${(updateSize / 1e6).toFixed(1)} MB` : ''].filter(Boolean).join(' · ');
+    const pct = Math.round(Math.max(0, Math.min(1, m.progress || 0)) * 100);
+    const view = {
+      available: { title: 'Update available', msg: '', actions: true, progress: false, go: 'Update' },
+      downloading: { title: 'Downloading update', msg: '', actions: false, progress: true },
+      installing: { title: 'Installing update', actions: false, progress: true,
+        msg: 'Confirm on the next screen. The first time, Android asks you to allow installs from Bureau. Turn it on, then go back.' },
+      failed: { title: "Update didn't finish", msg: m.message || 'Something went wrong. Try again.', actions: true, progress: false, go: 'Try again' },
+    }[m.state];
+    if (!view) return;
+    $('updateTitle').textContent = view.title;
+    $('updateSub').textContent = sub;
+    $('updateMsg').textContent = view.msg;
+    show('updateMsg', !!view.msg);
+    show('updateActions', view.actions);
+    show('updateProgress', view.progress);
+    if (view.go) $('updateGo').textContent = view.go;
+    if (view.progress) {
+      const p = m.state === 'installing' ? 100 : pct;
+      $('updateBar').style.width = p + '%';
+      $('updatePct').textContent = p + '%';
+    }
+  }
+
+  // ---- interactions ----
+  let focused = 'from';   // the amount field the sign keys type into
+  for (const side of ['from', 'to']) {
+    const input = field(side);
+    // The input is only as wide as its text, so a tap anywhere in the amount area focuses it.
+    $(side + 'Wrap').addEventListener('click', e => { if (e.target !== input) input.focus(); });
+    // Only typing makes a field the one being edited: tapping the answer and away
+    // again must leave the amount you typed exactly as it was.
+    let before = '';
+    input.addEventListener('focus', () => {
+      focused = side;
+      before = input.value;
+      input.select();
+      showOps(true);
+    });
+    input.addEventListener('input', () => { state.edited = side; convert(); });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+    input.addEventListener('blur', () => {
+      showOps(false);
+      if (input.value === before) return;
+      // Tidy what was typed (grouping, or the result of a sum) without rounding it.
+      const { value } = evaluate(input.value);
+      if (Number.isFinite(value) && value >= 0) {
+        // Coins keep what was typed without padding it to eight places.
+        const d = CRYPTO[state[side]] ? 2 : fractionDigits(state[side]);
+        input.value = nf({ minimumFractionDigits: d, maximumFractionDigits: Math.max(d, 8) }).format(value);
+        convert();
+      }
+    });
+  }
+
+  // Operator keys: only on touch screens, only while an amount is being edited.
+  const coarse = matchMedia('(pointer: coarse)');
+  let opsTimer = 0;
+  function showOps(on) {
+    clearTimeout(opsTimer);
+    if (on) { if (coarse.matches) $('ops').hidden = false; }
+    else opsTimer = setTimeout(() => { $('ops').hidden = true; }, 120);
+  }
+  // On the web the keyboard covers the page rather than shrinking it, so the keys
+  // go by what's still visible, and drop the gap for the home bar while it's up.
+  const seen = window.visualViewport;
+  function placeOps() {
+    const keyboard = Math.max(0, Math.round(innerHeight - seen.height - seen.offsetTop));
+    $('ops').style.bottom = `${keyboard}px`;
+    $('ops').style.paddingBottom = keyboard ? '2px' : '';
+  }
+  if (seen && !app) { seen.addEventListener('resize', placeOps); seen.addEventListener('scroll', placeOps); }
+  $('ops').addEventListener('pointerdown', e => e.preventDefault());   // keep the keyboard up
+  $('ops').addEventListener('click', e => {
+    const b = e.target.closest('button[data-op]');
+    if (!b) return;
+    haptic('tick');
+    const input = field(focused);
+    if (document.activeElement !== input) input.focus();
+    let start = input.selectionStart ?? input.value.length, end = input.selectionEnd ?? input.value.length;
+    // The amount is selected on focus so typing replaces it; a sign carries it on.
+    if (start === 0 && end === input.value.length) start = end;
+    input.setRangeText(b.dataset.op, start, end, 'end');
+    input.dispatchEvent(new Event('input'));
+  });
+
+  function savePair() {
+    store.set('pair', { from: state.from, to: state.to });
+  }
+  function swap() {
+    [state.from, state.to] = [state.to, state.from];
+    const f = field('from').value;
+    field('from').value = field('to').value;
+    field('to').value = f;
+    state.edited = other(state.edited);
+    savePair();
+    renderAll();
+    renderTrend();
+    slideLegs();
+  }
+  // The two rows trade places: each slides in from where the other was,
+  // and the arrows turn half a turn with them.
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let swapTurns = 0;
+  function slideLegs() {
+    $('swap').firstElementChild.style.transform = `rotate(${++swapTurns * 180}deg)`;
+    if (reduceMotion.matches || !Element.prototype.animate) return;
+    const legs = document.querySelectorAll('.leg');
+    const shift = legs[0].offsetHeight * 0.35;
+    legs.forEach((leg, i) => {
+      const from = i === 0 ? shift : -shift;
+      for (const el of leg.querySelectorAll('.pick, .amount-wrap')) {
+        el.animate(
+          [{ transform: `translateY(${from}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
+          { duration: 220, easing: 'cubic-bezier(.2, .7, .2, 1)' },
+        );
+      }
+    });
+  }
+  $('swap').addEventListener('click', () => { haptic(); swap(); });
+  $('status').addEventListener('click', () => {
+    if (loading) return;
+    $('status').textContent = 'Checking…';
+    loadRates();
+  });
+  $('feeBtn').addEventListener('click', () => ($('feeMenu').hidden ? openFee() : closeFee()));
+  $('feeOpts').addEventListener('click', e => {
+    const b = e.target.closest('button[data-fee]');
+    if (!b) return;
+    haptic('tick');
+    setFee(Number(b.dataset.fee));
+    closeFee(true);
+  });
+  // A custom fee applies as you type; Done or Enter closes the menu.
+  $('feeCustom').addEventListener('input', e => {
+    const n = e.target.value.trim() ? parseNumber(e.target.value.replace('%', '').trim()) : 0;
+    if (Number.isFinite(n) && n >= 0 && n <= MAX_FEE) setFee(n);
+  });
+  $('feeCustom').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); closeFee(true); } });
+  $('feeCustom').addEventListener('blur', renderFee);
+  $('feeMenu').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeFee(true); } });
+  $('alertBtn').addEventListener('click', () => ($('alertMenu').hidden ? openAlert() : closeAlert()));
+  $('alertTarget').addEventListener('input', renderAlertHint);
+  $('alertTarget').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); setAlert(); } });
+  $('alertSet').addEventListener('click', setAlert);
+  $('alertRemove').addEventListener('click', removeAlert);
+  $('alertAllow').addEventListener('click', () => toApp({ type: 'notificationSettings' }));
+  $('alertMenu').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeAlert(true); } });
+  document.addEventListener('pointerdown', e => {
+    if (!$('feeMenu').hidden && !$('feeBox').contains(e.target)) closeFee();
+    if (!$('alertMenu').hidden && !$('alertMenu').contains(e.target) && !$('alertBtn').contains(e.target)) closeAlert();
+  });
+  // The app's Back gesture calls this first: it closes whichever menu is open.
+  window.bureauBack = () => {
+    if (!$('feeMenu').hidden) { closeFee(); return true; }
+    if (!$('alertMenu').hidden) { closeAlert(); return true; }
+    if (dlg.open) { dlg.close(); return true; }
+    return false;
+  };
+  $('range').addEventListener('click', e => {
+    const b = e.target.closest('button[data-days]');
+    if (!b || Number(b.dataset.days) === state.days) return;
+    haptic('tick');
+    state.days = Number(b.dataset.days);
+    store.set('days', state.days);
+    renderTrend();
+  });
+
+  // ---- picker ----
+  const dlg = $('picker');
+  let pickingSide = 'from';
+  function openPicker(side) {
+    pickingSide = side;
+    $('pickerSearch').value = '';
+    renderPickerList('');
+    dlg.showModal();
+    $('pickerSearch').focus();
+    toApp({ type: 'picker', open: true });
+  }
+  dlg.addEventListener('close', () => toApp({ type: 'picker', open: false }));
+  function itemButton(code, hint) {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.code = code;
+    if (!hint && CRYPTO[code] && state.rates && !(state.rates[code] > 0)) hint = 'no rate today';
+    const current = code === state[pickingSide];
+    if (current) b.setAttribute('aria-current', 'true');
+    const c = document.createElement('span'); c.className = 'c'; c.textContent = code;
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = nameOf(code);
+    if (hint) {
+      const h = document.createElement('span');
+      h.className = 'hint';
+      h.textContent = ` · ${hint}`;
+      n.append(h);
+    }
+    const t = document.createElement('span'); t.className = 'tick'; t.setAttribute('aria-hidden', 'true'); t.textContent = current ? '✓' : '';
+    b.append(c, n, t);
+    li.append(b);
+    return li;
+  }
+  function group(label, codes) {
+    if (!codes.length) return [];
+    const li = document.createElement('li');
+    li.className = 'group';
+    li.textContent = label;
+    return [li, ...codes.map(code => itemButton(code))];
+  }
+  function renderPickerList(q) {
+    const list = $('pickerList');
+    const all = currencies.length ? currencies : COMMON;
+    const typed = q.trim();
+    q = typed.toLowerCase();
+    if (!q) {
+      const recent = state.recent.filter(c => all.includes(c));
+      const common = COMMON.filter(c => all.includes(c) && !recent.includes(c));
+      const crypto = Object.keys(CRYPTO).filter(c => all.includes(c) && !recent.includes(c));
+      const rest = currencies.filter(c => !CRYPTO[c]);
+      list.replaceChildren(
+        ...group('Recent', recent),
+        ...group('Common', common),
+        ...group('Crypto', crypto),
+        ...group('All currencies', rest)
+      );
+      return;
+    }
+    const hits = all
+      .map(c => [c, BureauLib.searchScore(q, c, nameOf(c), placesOf(c))])
+      .filter(([, m]) => m)
+      .sort((a, b) => a[1].score - b[1].score);
+    if (!hits.length) {
+      const li = document.createElement('li');
+      li.className = 'group';
+      li.textContent = `Nothing matches “${typed}”`;
+      list.replaceChildren(li);
+      return;
+    }
+    list.replaceChildren(...hits.map(([c, m]) => itemButton(c, m.hint)));
+  }
+
+  // Country names for a currency, in this language and in English, plus
+  // everyday aliases (UK, USA, Dubai), so the picker finds THB from "Thailand".
+  let regionNames = null, regionNamesEn = null;
+  try { regionNames = new Intl.DisplayNames([locale], { type: 'region' }); } catch {}
+  try { regionNamesEn = new Intl.DisplayNames(['en'], { type: 'region' }); } catch {}
+  const placesCache = new Map();
+  function placesOf(code) {
+    if (placesCache.has(code)) return placesCache.get(code);
+    const places = new Set();
+    for (const region of BureauLib.regionsOf(code)) {
+      for (const dn of [regionNames, regionNamesEn]) {
+        try { const name = dn && dn.of(region); if (name && name !== region) places.add(name); } catch {}
+      }
+      for (const alias of BureauLib.REGION_ALIASES[region] || []) places.add(alias);
+    }
+    const list = [...places];
+    placesCache.set(code, list);
+    return list;
+  }
+  function choose(code) {
+    haptic();
+    const otherSide = other(pickingSide);
+    if (code === state[otherSide]) state[otherSide] = state[pickingSide];
+    state[pickingSide] = code;
+    state.recent = [code, ...state.recent.filter(c => c !== code)].slice(0, 5);
+    store.set('recent', state.recent);
+    savePair();
+    dlg.close();
+    renderAll();
+    renderTrend();
+  }
+  $('pickFrom').addEventListener('click', () => openPicker('from'));
+  $('pickTo').addEventListener('click', () => openPicker('to'));
+  $('pickerClose').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', e => {
+    if (e.target === dlg) return dlg.close();
+    const b = e.target.closest('button[data-code]');
+    if (b) choose(b.dataset.code);
+  });
+  $('pickerSearch').addEventListener('input', e => renderPickerList(e.target.value));
+  $('pickerSearch').addEventListener('keydown', e => {
+    const first = $('pickerList').querySelector('button[data-code]');
+    if (e.key === 'Enter' && first) { e.preventDefault(); choose(first.dataset.code); }
+    if (e.key === 'ArrowDown' && first) { e.preventDefault(); first.focus(); }
+  });
+  $('pickerList').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const btns = [...$('pickerList').querySelectorAll('button[data-code]')];
+    const i = btns.indexOf(document.activeElement);
+    const next = e.key === 'ArrowDown' ? btns[i + 1] : (i <= 0 ? $('pickerSearch') : btns[i - 1]);
+    if (next) next.focus();
+  });
+
+  // ---- boot ----
+  const savedAmount = store.get('amount');
+  if (savedAmount && typeof savedAmount.value === 'string' && savedAmount.value) {
+    state.edited = savedAmount.side === 'to' ? 'to' : 'from';
+    field(state.edited).value = savedAmount.value;
+  } else {
+    field('from').value = fmtAmount(100, state.from);
+  }
+  renderAll();
+  renderTrend();
+  toApp({ type: 'hello' });
+  loadRates();
+  setInterval(() => { if (!document.hidden) loadRates(); }, REFRESH_MS);
+  setInterval(renderStatus, 15_000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && Date.now() - state.fetchedAt > REFRESH_MS) loadRates();
+  });
+  addEventListener('online', loadRates);
+  addEventListener('resize', fitAll);
+  if (document.fonts) document.fonts.ready.then(fitAll);
+})();
+</script>
+</body>
+</html>
