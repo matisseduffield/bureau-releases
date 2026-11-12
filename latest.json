@@ -1,0 +1,11 @@
+{
+  "versionCode": 11700,
+  "versionName": "1.17.0",
+  "apk": "https://raw.githubusercontent.com/matisseduffield/bureau-releases/main/Bureau-v1.17.0.apk",
+  "size": 317344,
+  "sha256": "b8c6110dc323b127559af967d3ae67bb7fd2b870fe8c68f9966ed90015f0616e",
+  "publishedAt": "2026-11-12T02:54:49Z",
+  "notes": [
+    "About is now its own page with the version, contact and policies"
+  ]
+}
