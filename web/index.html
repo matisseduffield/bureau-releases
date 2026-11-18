@@ -1,0 +1,2135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F0F1F3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171719" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='18 18 72 72'%3E%3Crect x='18' y='18' width='72' height='72' rx='16' fill='%23F4C52E'/%3E%3Cpath d='M42 32v44M30 64l12 12 12-12M66 76V32M54 44l12-12 12 12' fill='none' stroke='%2314211C' stroke-width='6.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bureau">
+<title>Bureau</title>
+<style>
+/* Hanken Grotesk ships with the page (fonts/, SIL OFL) so the app looks the same offline. */
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("fonts/hanken-grotesk-latin.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("fonts/hanken-grotesk-latin-ext.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Layout: one narrow column, a screen long. The two amounts on top, a card each, with
+   the swap on the seam between them; one line for the rate and how old it is; the trend
+   in a card; the rates credit. The fee and the rate alert are in the menu, top right.
+   Colour: plain greys and one blue. A near-black page (pale grey by day), one
+   lighter grey for every card, blue for the amount you typed and the one thing
+   to press. Keys are lit a little from above, with a thin rim; the round buttons
+   in a header are flat discs, quieter than keys. */
+:root {
+  --bg: #F0F1F3;
+  --surface: #FFFFFF;
+  --ink: #17181B;
+  --muted: #5F6168;
+  --faint: #696B72;
+  --line: #E1E2E6;
+  --line-strong: #8D8F96;
+  --accent: #2C53C4;
+  --accent-soft: rgba(44, 83, 196, .09);
+  --on-ink: #FFFFFF;
+  --pos: #1D7548;
+  --neg: #B0392D;
+  --key: #D6D8DE;
+  --key-hi: #E4E5EA;
+  --key-down: #C6C8CF;
+  --card-key: #D6D8DE;
+  --card-key-hi: #E4E5EA;
+  --card-key-down: #C6C8CF;
+  --pop: #FFFFFF;
+  --pop-line: rgba(0, 0, 0, .06);
+  --disc: #FFFFFF;
+  --disc-edge: inset 0 0 0 1px rgba(0, 0, 0, .05), 0 2px 6px rgba(0, 0, 0, .08);
+  --rim: inset 0 0 0 1px rgba(0, 0, 0, .04), inset 0 1px 0 rgba(255, 255, 255, .6);
+  --lift: 0 1px 3px rgba(0, 0, 0, .12);
+  --backdrop: rgba(12, 13, 16, .4);
+  --font: "Hanken Grotesk", "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171719;
+    --surface: #2F2F2F;
+    --ink: #EAEAEA;
+    --muted: #A0A0A3;
+    --faint: #949497;
+    --line: #434345;
+    --line-strong: #6E6E72;
+    --accent: #85A2FF;
+    --accent-soft: rgba(133, 162, 255, .12);
+    --on-ink: #171719;
+    --pos: #5FC890;
+    --neg: #F08476;
+    --key: #303132;
+    --key-hi: #47484A;
+    --key-down: #555658;
+    --card-key: #46474A;
+    --card-key-hi: #58595C;
+    --card-key-down: #666769;
+    --pop: #121213;
+    --pop-line: rgba(255, 255, 255, .14);
+    --disc: #252526;
+    --disc-edge: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 4px 10px rgba(0, 0, 0, .35);
+    --rim: inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 1px 0 rgba(255, 255, 255, .1);
+    --lift: 0 2px 5px rgba(0, 0, 0, .35);
+    --backdrop: rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171719;
+  --surface: #2F2F2F;
+  --ink: #EAEAEA;
+  --muted: #A0A0A3;
+  --faint: #949497;
+  --line: #434345;
+  --line-strong: #6E6E72;
+  --accent: #85A2FF;
+  --accent-soft: rgba(133, 162, 255, .12);
+  --on-ink: #171719;
+  --pos: #5FC890;
+  --neg: #F08476;
+  --key: #303132;
+  --key-hi: #47484A;
+  --key-down: #555658;
+  --card-key: #46474A;
+  --card-key-hi: #58595C;
+  --card-key-down: #666769;
+  --pop: #121213;
+  --pop-line: rgba(255, 255, 255, .14);
+  --disc: #252526;
+  --disc-edge: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 4px 10px rgba(0, 0, 0, .35);
+  --rim: inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 1px 0 rgba(255, 255, 255, .1);
+  --lift: 0 2px 5px rgba(0, 0, 0, .35);
+  --backdrop: rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+/* Never wider than the screen, however large the phone's text */
+html, body { overflow-x: hidden; overflow-x: clip; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  padding-block: calc(8px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-bottom, 0px));
+  /* 18px at each side, here and on every page (the picker, Settings, About) */
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* The column is at least the screen's height, so the rates credit, the last thing in it,
+   sits at the bottom of the screen (above the home bar) with any room to spare over it;
+   on a page longer than the screen it simply comes last. */
+.wrap {
+  max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px;
+  min-height: calc(100vh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  min-height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
+.wrap > * { flex: none; min-width: 0; }
+
+/* Top bar: the app's mark and its name at the left, a round button at the right */
+.top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { flex: none; }
+.mark { min-width: 0; margin: 0; font-size: 1.35rem; font-weight: 500; letter-spacing: -.01em; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icon-btn {
+  position: relative; display: grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 0;
+  background: var(--disc); border: 0; border-radius: 50%; box-shadow: var(--disc-edge); color: var(--ink);
+}
+.icon-btn:active { background: var(--key-down); }
+@media (hover: hover) { .icon-btn:hover { background: var(--key); } }
+
+/* More: a small panel that drops from its button, a picture and a word for each thing:
+   Settings, sharing (in the iPhone app), About. */
+.menu {
+  position: absolute; z-index: 6; top: calc(100% + 4px); right: 0;
+  min-width: 208px; max-width: 100%; padding: 9px 8px;
+  background: var(--pop); border: 1px solid var(--pop-line); border-radius: 28px; box-shadow: 0 12px 32px rgba(0, 0, 0, .4);
+  transform-origin: top right; animation: pop .14s ease-out;
+}
+@keyframes pop { from { opacity: 0; transform: scale(.94); } }
+.menu-row {
+  display: flex; align-items: center; gap: 15px; width: 100%; min-height: 46px; padding: 0 20px 0 16px;
+  background: none; border: 0; border-radius: 18px;
+  font-size: 1.06rem; text-align: left; white-space: nowrap;
+}
+.menu-row:active { background: var(--key); }
+@media (hover: hover) { .menu-row:hover { background: var(--key); } }
+.menu-row svg { flex: none; }
+/* About's picture is drawn here: its words are set by the script (About, or that an update is waiting) */
+#version::before {
+  content: ""; flex: none; width: 22px; height: 22px; background: currentColor;
+  -webkit-mask: var(--info) center / contain no-repeat; mask: var(--info) center / contain no-repeat;
+  --info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5.5'/%3E%3Ccircle cx='12' cy='7.7' r='.5' fill='%23000'/%3E%3C/svg%3E");
+}
+.menu-row[data-state="available"] { color: var(--accent); }
+/* An update is waiting: a dot on the button */
+.top:has(.menu-row[data-state="available"]) #menuBtn::after { content: ""; position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+/* Buttons are pills: grey and lit from above, or the accent for the one to press.
+   They all sit on cards, so the grey is the lighter one made for a card. */
+.btn-secondary, .link { background: linear-gradient(var(--card-key-hi), var(--card-key)); box-shadow: var(--rim); color: var(--ink); }
+.btn-secondary:active, .link:active { background: var(--card-key-down); }
+.btn-primary, #alertSet { background: var(--accent); box-shadow: none; color: var(--on-ink); }
+.btn-primary:active, #alertSet:active { background: var(--accent); opacity: .85; }
+
+/* Update card (only inside the app, when a new version is published), as in
+   Nudge: title and size, what's new, then two buttons or a progress bar. */
+.update { display: grid; gap: 14px; padding: 20px; background: var(--surface); border-radius: 24px; }
+.update p { margin: 0; }
+.update-title { font-size: 1.06rem; font-weight: 500; line-height: 1.3; }
+.update-sub, .update-msg { font-size: .88rem; color: var(--muted); }
+.update-notes { margin: 0; padding: 0 0 0 18px; font-size: .92rem; line-height: 1.45; }
+.update-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.update-actions button { min-height: 52px; padding: 0 18px; border: 0; border-radius: 99px; font-size: .95rem; font-weight: 500; }
+.update-progress { display: flex; align-items: center; gap: 12px; min-height: 52px; }
+.update-track { flex: 1; height: 6px; border-radius: 3px; background: var(--accent-soft); overflow: hidden; }
+.update-track span { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width .2s; }
+.update-pct { min-width: 3.2ch; text-align: right; font-size: .9rem; font-weight: 500; }
+
+/* The converter: a card for each amount, the full width, and a round swap button
+   on the seam between the two, at the right */
+.slip { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.legs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+/* In a card: the label across the top, then the amount, with a sum's answer at its right on the same baseline */
+.leg {
+  position: relative; grid-column: 1;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; gap: 0;
+  min-width: 0; min-height: 116px; padding: 18px 20px 22px;
+  background: var(--surface); border-radius: 24px;
+}
+/* The swap button and its ring reach 22px into each card at the right. A card's padding
+   keeps its lines of text clear of that: the first card's amount ends above the ring and
+   the second card's label starts below it, so both may run the card's full width. */
+.leg:first-child { grid-row: 1; }
+.leg + .leg { grid-row: 2; }
+/* The currency is the card's label: its name and code in grey, with a chevron. Tap it to change. */
+.pick {
+  position: relative; z-index: 1; grid-column: 1 / -1; justify-self: start; display: flex; align-items: center; gap: 6px;
+  max-width: 100%; min-height: 44px; margin: -6px 0 -8px; padding: 0;
+  background: none; border: 0;
+  font-size: 1rem; line-height: 1.4; color: var(--muted); text-align: left;
+}
+@media (hover: hover) { .pick:hover { color: var(--ink); } }
+.pick:active { color: var(--ink); }
+.pick .name { order: -1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick .code { flex: none; display: inline-flex; align-items: center; gap: 10px; }
+.pick .code::after {
+  content: ""; width: 7px; height: 7px; margin-right: 3px;
+  border: solid currentColor; border-width: 1.5px 1.5px 0 0;
+  transform: rotate(45deg);
+}
+/* A sum being typed shows its answer at the card's bottom right, on the amount's baseline.
+   It has a column of its own, so the sum is fitted to the room left and the two never meet.
+   The other card, the one with the answer, says there in blue when a fee is in it
+   ("incl. 2.5% fee"); a tap on that opens Settings, where the fee is. */
+.calc, .incl {
+  grid-column: 2; align-self: baseline;
+  padding: 0 0 0 10px;
+  font-size: .9rem; line-height: 1.3; white-space: nowrap;
+}
+.calc { max-width: calc(44vw - 40px); color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.incl { position: relative; z-index: 1; background: none; border: 0; color: var(--accent); }
+/* A 44px tap area on a line of small text */
+.incl::before { content: ""; position: absolute; inset: -13px -8px -13px 2px; }
+/* Where the amount, at its smallest, has no room beside the fee's note, the note goes under it (see fitLeg) */
+.leg.under .amount-wrap { grid-column: 1 / -1; }
+.leg.under .incl { grid-column: 1 / -1; justify-self: start; margin-top: 4px; padding-left: 0; }
+/* The amount sizes to its text so the muted symbol can sit right beside it. */
+.amount-wrap {
+  grid-column: 1; align-self: baseline;
+  position: relative; z-index: 0; min-width: 0;
+  display: flex; justify-content: flex-start; align-items: baseline; gap: 6px;
+  cursor: text;
+}
+/* A tap anywhere in the card under its label lands on the amount, however small a long one is drawn */
+.amount-wrap::before { content: ""; position: absolute; z-index: -1; inset: 0 -20px -22px; }
+/* (Its line is no taller than its letters, so the amount alone sets the row's height, whatever the font.) */
+.sym { flex: none; font-size: clamp(1.15rem, 5vw, 1.4rem); line-height: 1; color: var(--muted); }
+.sym:empty { display: none; }
+.amount-wrap .amount { flex: 0 1 auto; min-width: 1ch; field-sizing: content; }
+@supports not (field-sizing: content) {
+  .sym { display: none; }
+  .amount-wrap .amount { flex: 1; }
+}
+/* (Its height is set, not left to the font: a field is taller in the system's font, and the
+   cards would shrink by a few pixels when the page's own font arrived.) */
+.amount {
+  flex: 1; min-width: 0; height: calc(1.2em + 4px);
+  padding: 2px 0;
+  border: 0; background: transparent;
+  font-size: clamp(1.9rem, 8.4vw, 2.3rem); font-weight: 400; line-height: 1.2; letter-spacing: -.015em;
+  text-align: left;
+  caret-color: var(--accent);
+}
+.amount:focus { outline: none; }
+.amount::placeholder { color: var(--muted); opacity: 1; }
+/* The amount you typed is the blue one; the other is its answer */
+.legs[data-edited="from"] #fromAmount, .legs[data-edited="to"] #toAmount { color: var(--accent); }
+
+/* A round disc like the header's, centred on the seam (it shares the second card's cell and
+   is pulled up half its height and half the gap), with a ring in the page's colour so it
+   reads as cut into the two cards. It stands far enough in from the right that the ring
+   ends on the cards' straight edges, short of their rounded corners. */
+.swap {
+  position: relative; z-index: 2;
+  grid-column: 1; grid-row: 2; justify-self: end; align-self: start;
+  display: grid; place-items: center; width: 44px; height: 44px; margin: -27px 34px 0 0; padding: 0;
+  background: var(--disc); border: 0; border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--pop-line), 0 0 0 5px var(--bg);
+  color: var(--ink);
+}
+.swap:active { background: var(--card-key-down); }
+@media (hover: hover) { .swap:hover { background: var(--card-key); } }
+.swap svg { transition: transform .28s cubic-bezier(.2, .7, .2, 1); }
+
+/* Under the amounts, one quiet line, centred: the rate in ink, then how old the rates are
+   with a turning arrow (tap to refresh). The two share a row where they fit on it, and
+   where they don't (a long coin rate, a long status) the rate goes over the status
+   (.two, see fitStatus). Either way the line has the height of the two rows, always, so
+   the trend under it never moves, whatever it says. */
+.statusline {
+  display: flex; align-items: center; justify-content: center; gap: 4px 14px;
+  min-height: 62px; padding: 0 4px;
+  font-size: .95rem; line-height: 1.4; text-align: center; white-space: nowrap;
+}
+.statusline.two { flex-direction: column; white-space: normal; }
+.rate-main { max-width: 100%; margin: 0; color: var(--ink); overflow-wrap: break-word; }
+.rate-main:empty { display: none; }
+.rate-main b { font-weight: 500; white-space: nowrap; }
+.status {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  max-width: 100%; min-height: 28px; padding: 0;
+  background: none; border: 0;
+  font-size: .85rem; line-height: 1.3; color: var(--muted);
+}
+/* A 44px tap area on a 28px line */
+.status::before { content: ""; position: absolute; inset: -8px -6px; }
+.status::after {
+  content: ""; flex: none; width: 17px; height: 17px; background: currentColor;
+  -webkit-mask: var(--turn) center / contain no-repeat; mask: var(--turn) center / contain no-repeat;
+  --turn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16.5 10a6.5 6.5 0 1 1-2.1-4.8'/%3E%3Cpath d='M16.6 2.6v3.6H13'/%3E%3C/svg%3E");
+}
+@media (hover: hover) { .status:hover { color: var(--ink); } }
+.status:active { color: var(--ink); }
+/* With no rates and no way to get them, that one line says so: there is no trend to show either */
+.norates #trendSection.off { display: none; }
+.install-hint { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; padding: 0 4px; font-size: .88rem; line-height: 1.35; color: var(--muted); }
+.install-hint button { flex: none; width: 44px; height: 44px; margin: -10px -12px -10px 0; padding: 0; background: none; border: 0; font-size: 1.2rem; color: var(--muted); }
+/* The rates credit stays on the page (ExchangeRate-API's terms ask for it): one quiet line
+   at the foot of the screen, or of the page where that is longer. */
+.foot { margin-top: auto; text-align: center; font-size: .9rem; color: var(--muted); }
+.foot a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: inherit; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 4px; }
+@media (hover: hover) { .foot a:hover { color: var(--ink); } }
+
+/* Settings (a page like About: see "Pages" below) has the fee, and in the Android app the
+   rate alert. A field sits at the right of its row: a hollow in the page's colour, with the
+   number typed bare inside it, like the amounts, and its unit beside it. */
+.about-row > .row-field {
+  flex: none; display: flex; align-items: center; gap: 4px; min-height: 40px; margin: -6px 0; padding: 0 16px;
+  border-radius: 99px; background: var(--bg);
+  font-size: 1.06rem; color: var(--muted); cursor: text; white-space: nowrap;
+}
+.about-row > .row-field:focus-within { box-shadow: inset 0 0 0 2px var(--accent); }
+label.about-row { cursor: text; }
+/* What a card is for, in grey under it */
+.page-note { flex: none; margin: -4px 20px 0; font-size: .9rem; line-height: 1.45; color: var(--muted); }
+.page-note:empty { display: none; }
+.inline-in {
+  width: 4ch; padding: 0;
+  border: 0; background: none; outline: none;
+  font-weight: 500; color: var(--ink); text-align: right;
+  caret-color: var(--accent);
+}
+@supports (field-sizing: content) { .inline-in { width: auto; min-width: 1ch; field-sizing: content; } }
+.inline-in::placeholder { color: var(--muted); opacity: 1; font-weight: 400; }
+.inline-in[aria-invalid="true"] { color: var(--neg); }
+
+/* Rate alert (a row of Settings, in the Android app): the row opens the alert's own rows
+   under it in the same card. "Alert when 1 GBP reaches" with the rate at its right, then
+   how far that is from the rate now, with the buttons at its right. A target that is
+   set shows at the row's right, before its chevron. */
+#alertVal { margin-left: auto; }
+#alertBtn::after {
+  content: ""; flex: none; width: 9px; height: 9px; margin: -5px 4px 0 0;
+  border: solid var(--line-strong); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
+}
+#alertBtn[aria-expanded="true"]::after { margin-top: 5px; transform: rotate(225deg); }
+#alertRow { display: contents; }
+#alertRow .about-row { border-top: 1px solid var(--line); }
+#alertRow .row-field { flex: 0 1 auto; min-width: 0; }
+#alertRow .inline-in { min-width: 2ch; }
+/* Its label is a few words, which go on to a second line beside the field where they must */
+#alertRow label.about-row > span:first-child { flex: 1 1 0; min-width: 0; white-space: normal; }
+#alertRow .alert-acts { flex-wrap: wrap; gap: 8px 12px; padding: 5px 0 6px; }
+#alertRow .alert-hint { flex: 1 1 auto; min-width: 0; margin: 0; font-size: .9rem; color: var(--muted); text-align: left; white-space: normal; }
+.alert-btns { flex: none; display: flex; gap: 8px; margin-left: auto; }
+.link {
+  flex: none; min-height: 44px; padding: 0 18px;
+  border: 0; border-radius: 99px;
+  font-size: .95rem; font-weight: 500;
+}
+
+/* The trend: a card, a small grey label at its top */
+.section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 18px 20px; background: var(--surface); border-radius: 24px; }
+.section-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 12px; }
+.section h2 { margin: 0; font-size: 1rem; font-weight: 400; line-height: 1.4; color: var(--muted); }
+/* How far the rate has moved is the trend card's value: large and light, green up and red down */
+/* Its line is kept while the trend loads, so the card is the same height before and after */
+.change { display: block; min-height: 1.25em; margin-top: 2px; font-size: 1.75rem; letter-spacing: -.015em; line-height: 1.25; white-space: nowrap; }
+.change.up { color: var(--pos); }
+.change.down { color: var(--neg); }
+
+/* The range is a switch: a pill track, with a raised pill for the one chosen */
+.range { display: flex; gap: 2px; margin-left: auto; padding: 3px; border-radius: 99px; background: var(--bg); }
+.range button {
+  position: relative; min-width: 44px; min-height: 34px; padding: 0 12px;
+  background: none; border: 0; border-radius: 99px;
+  font-size: .92rem; font-weight: 500; color: var(--muted);
+}
+/* A 44px tap area on a 34px pill */
+.range button::before { content: ""; position: absolute; inset: -8px 0; }
+@media (hover: hover) { .range button:hover { color: var(--ink); } }
+.range button[aria-pressed="true"] { background: linear-gradient(var(--card-key-hi), var(--card-key)); box-shadow: var(--rim); color: var(--ink); }
+
+.trend { position: relative; height: 116px; border-bottom: 1px solid var(--line); transition: opacity .2s; }
+.trend.loading { opacity: .35; }
+.trend svg { position: absolute; top: 0; bottom: 0; left: 0; right: 6px; width: calc(100% - 6px); height: 100%; overflow: visible; }
+.trend .line { fill: none; stroke: var(--accent); stroke-width: 1.75; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.trend .end { position: absolute; left: calc(100% - 6px); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--accent); }
+/* Under the chart, one line: a date at each end, low and high between them. Nothing breaks.
+   Where low and high don't fit between the dates they take a line of their own under them
+   (.stack, see fitAxis; always on the narrowest phones), and only there, with very big
+   text, may a long one break inside a number rather than run off the page. */
+.trend-axis { display: flex; justify-content: space-between; gap: 0 12px; min-height: 1.5em; font-size: .78rem; color: var(--muted); }
+.trend-axis span { flex: none; white-space: nowrap; }
+.trend-axis .mid { flex: 0 1 auto; min-width: 0; text-align: center; overflow: hidden; text-overflow: ellipsis; }
+.trend-axis.stack { flex-wrap: wrap; }
+.trend-axis.stack .mid { order: 1; flex: 1 0 100%; white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 340px) {
+  .trend-axis { flex-wrap: wrap; min-height: 3em; }
+  .trend-axis .mid { order: 1; flex: 1 0 100%; white-space: normal; overflow-wrap: anywhere; }
+}
+.trend-axis .mid.active { color: var(--ink); font-weight: 500; }
+.trend { touch-action: pan-y; }
+.trend .probe-line { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -.5px; background: var(--muted); opacity: .5; pointer-events: none; }
+.trend .probe-dot {
+  position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 3px var(--surface); pointer-events: none;
+}
+/* A trend that can't load is one grey line on the page, with no card and nothing to switch between. */
+.trend-note { margin: 0; font-size: .9rem; color: var(--muted); text-align: center; }
+.section.off { padding: 6px 20px; background: none; }
+.section.off > :not(.trend-note) { display: none; }
+
+/* Sign keys above the phone keyboard (Android's number pad has none): four round keys */
+.ops {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  padding: 8px max(18px, env(safe-area-inset-right, 0px)) calc(2px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  background: var(--bg);
+  user-select: none; -webkit-user-select: none;
+}
+.ops button {
+  min-height: 48px; margin-bottom: 6px; padding: 0; border: 0; border-radius: 99px;
+  background: linear-gradient(var(--key-hi), var(--key)); box-shadow: var(--rim), var(--lift); color: var(--ink);
+  font-size: 1.5rem; font-weight: 400; line-height: 1;
+  touch-action: manipulation;
+}
+.ops button:active { background: var(--key-down); }
+
+/* Currency picker: a panel on a wide screen, a page of its own on a phone */
+dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(640px, calc(100dvh - 64px));
+  padding: 0; border: 0; border-radius: 28px; box-shadow: 0 0 0 1px var(--pop-line);
+  background: var(--bg); color: var(--ink);
+}
+dialog[open] { display: flex; flex-direction: column; }
+dialog::backdrop { background: var(--backdrop); }
+/* On a phone the picker itself takes focus (see openPicker); a ring round the whole screen says nothing. */
+dialog:focus { outline: none; }
+/* The picker eases in: a short rise and fade, with the backdrop fading behind it. */
+dialog, dialog::backdrop {
+  transition: opacity .18s ease-out, transform .22s cubic-bezier(.2, .7, .2, 1), overlay .22s allow-discrete, display .22s allow-discrete;
+  opacity: 0;
+}
+dialog { transform: translateY(12px); }
+dialog[open], dialog[open]::backdrop { opacity: 1; transform: none; }
+@starting-style {
+  dialog[open], dialog[open]::backdrop { opacity: 0; }
+  dialog[open] { transform: translateY(12px); }
+}
+/* A page's top, the same on every page, so its round Back is always at the one spot: Back,
+   then the page's name, or in the picker its search (a pixel taller than Back each way) */
+.picker-head { flex: none; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 14px 18px 6px; }
+.picker-head input {
+  flex: 1; min-width: 0; min-height: 46px; margin: -1px 0; padding: 0 18px;
+  border: 0; border-radius: 99px; background: var(--surface);
+  font-size: 1rem;
+}
+.picker-head input::placeholder { color: var(--muted); opacity: 1; }
+.picker-head input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+/* The search's clear button is a small disc inside its right end: 24px to the eye, 44px to
+   the finger. The browser's own search x gives way to it. */
+#pickerSearch { padding-right: 46px; }
+#pickerSearch::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+.clear-btn { position: relative; flex: none; display: grid; place-items: center; width: 24px; height: 24px; margin: 0 11px 0 -45px; padding: 0; background: var(--card-key); border: 0; border-radius: 50%; color: var(--ink); }
+.clear-btn::after { content: ""; position: absolute; inset: -10px; }
+.clear-btn:active { background: var(--card-key-down); }
+/* The list is in groups, each a rounded card under its grey label, a hairline between its rows */
+.picker-list { list-style: none; margin: 0; padding: 0 18px 18px; overflow-y: auto; overscroll-behavior: contain; }
+.picker-list .group { padding: 16px 20px 8px; font-size: 1rem; color: var(--muted); }
+.picker-list button {
+  position: relative;
+  width: 100%; min-height: 56px;
+  display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 0;
+  padding: 8px 20px; border: 0; background: var(--surface);
+  font-size: 1.06rem; line-height: 1.3; text-align: left;
+}
+.picker-list li:first-child > button, .picker-list .group + li > button { border-top-left-radius: 24px; border-top-right-radius: 24px; }
+.picker-list li:last-child > button, .picker-list li:has(+ .group) > button { border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
+.picker-list li:not(.group) + li:not(.group) > button::before { content: ""; position: absolute; top: 0; left: 20px; right: 20px; height: 1px; background: var(--line); }
+/* Hover only where there's a mouse: on a phone a tapped row would stay shaded and read as a second choice. */
+@media (hover: hover) { .picker-list button:hover { background: var(--card-key); } }
+.picker-list button:active { background: var(--card-key); }
+.picker-list button:focus-visible { background: var(--card-key); outline: 2px solid var(--accent); outline-offset: -2px; }
+/* The current currency has the tick. */
+.picker-list .c { font-weight: 500; }
+/* A long name goes on to a second line; only the chosen row gives room to a tick */
+.picker-list .n { padding-left: 10px; overflow-wrap: anywhere; }
+.picker-list .tick { display: grid; padding-left: 12px; color: var(--accent); }
+.picker-list .tick:empty { display: none; }
+.picker-list .hint { color: var(--muted); }
+
+/* Pages: About and Settings. Each is a page of its own: it fills the screen and Back
+   leaves it. A round Back with the page's name beside it, then rounded lists, a row for
+   each thing, with a hairline between them. The two are built alike in every measure. */
+dialog.page { width: 100%; max-width: none; height: 100dvh; max-height: 100dvh; margin: 0; padding: env(safe-area-inset-top, 0px) 0 0; border-radius: 0; box-shadow: none; }
+dialog.page > * { width: 100%; max-width: 480px; margin-inline: auto; }
+/* A page is there at once: no rise or fade, unlike the picker */
+dialog.page, dialog.page::backdrop { transition: none; }
+.picker-head h2 { flex: 1; min-width: 0; margin: 0; font-size: 1.35rem; font-weight: 500; line-height: 1.5; }
+/* A page opens with focus on its name (tabindex="-1"), not ringed on Back */
+.page [tabindex="-1"]:focus { outline: none; }
+.about-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; padding: 14px 18px max(22px, env(safe-area-inset-bottom, 0px)); overflow-y: auto; overscroll-behavior: contain; }
+/* What this is, on a card of its own: the icon, with the name and a line about it beside it */
+.about-id { flex: none; display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 16px; row-gap: 2px; padding: 18px 20px; background: var(--surface); border-radius: 24px; text-align: left; }
+.about-id img { grid-row: 1 / 3; border-radius: 13px; }
+.about-id p { margin: 0; }
+.about-id .about-name { align-self: end; font-size: 1.25rem; font-weight: 500; letter-spacing: -.01em; line-height: 1.25; }
+.about-id .about-tag { align-self: start; font-size: .95rem; line-height: 1.35; color: var(--muted); }
+.about-links { flex: none; display: grid; padding: 0 20px; background: var(--surface); border-radius: 24px; }
+/* A card with nothing to show (the version, on a page that has none) isn't drawn */
+.about-links:not(:has(> .about-row:not([hidden]))) { display: none; }
+.about-legal { display: contents; }
+.about-links .about-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 56px; margin: 0; padding: 12px 0;
+  background: none; border: 0;
+  font-size: 1.06rem; line-height: 1.3; color: var(--ink); text-align: left; text-decoration: none; overflow-wrap: anywhere;
+}
+.about-links > :not([hidden]) ~ .about-row, .about-legal .about-row { border-top: 1px solid var(--line); }
+/* The row's name stays on one line; what's said at its right gives way if it must */
+.about-row > span:first-child { flex: none; white-space: nowrap; }
+/* A second line under a row's name, in grey: the address to write to */
+.about-row small { display: block; margin-top: 2px; font-size: .9rem; color: var(--muted); }
+/* What a row is set to, at its right in grey: the version's number, how the update check went */
+.about-row > span + span { flex: 0 1 auto; min-width: 0; font-size: 1rem; color: var(--muted); text-align: right; overflow-wrap: break-word; }
+.about-row > span + span:empty { display: none; }
+a.about-row::after { content: ""; flex: none; width: 9px; height: 9px; margin-right: 3px; border: solid var(--line-strong); border-width: 1.5px 1.5px 0 0; transform: rotate(45deg); }
+.about-foot { flex: none; margin: auto 0 0; text-align: center; font-size: .8rem; line-height: 1.55; color: var(--muted); }
+@media (max-width: 520px) {
+  dialog {
+    width: 100%; max-width: none; height: 100dvh; max-height: 100dvh;
+    margin: 0; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); border: 0; border-radius: 0; box-shadow: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trend, .swap svg, dialog, dialog::backdrop { transition: none; }
+  dialog { transform: none; }
+  .menu { animation: none; }
+}
+/* iPhones zoom the page into any field under 16px; only iOS matches this. */
+@supports (-webkit-touch-callout: none) {
+  input:not(.amount), select { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="18 18 72 72" aria-hidden="true"><rect x="18" y="18" width="72" height="72" rx="17" fill="#F4C52E"/><path d="M42 32v44M30 64l12 12 12-12M66 76V32M54 44l12-12 12 12" fill="none" stroke="#14211C" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h1 class="mark">Bureau</h1>
+    </div>
+    <button class="icon-btn" id="menuBtn" type="button" aria-label="More" aria-haspopup="menu" aria-expanded="false" aria-controls="menu"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="10" cy="3.6" r="1.7"/><circle cx="10" cy="10" r="1.7"/><circle cx="10" cy="16.4" r="1.7"/></svg></button>
+    <div class="menu" id="menu" role="menu" hidden>
+      <button class="menu-row" id="settingsBtn" type="button" role="menuitem" aria-haspopup="dialog"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.9 19.9 7.45v9.1L12 21.1l-7.9-4.55v-9.1z"/><circle cx="12" cy="12" r="3"/></svg><span>Settings</span></button>
+      <button class="menu-row" id="shareBtn" type="button" role="menuitem" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8M5 13v5.5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V13"/></svg><span>Share this rate</span></button>
+      <button class="menu-row" id="version" type="button" role="menuitem" aria-haspopup="dialog">About</button>
+    </div>
+  </header>
+  <p class="install-hint" id="installHint" hidden><span>Keep Bureau on your iPhone: tap Share, then Add to Home Screen.</span><button type="button" aria-label="Dismiss">×</button></p>
+
+  <section class="update" id="updateCard" aria-label="App update" hidden>
+    <div>
+      <p class="update-title" id="updateTitle">Update available</p>
+      <p class="update-sub" id="updateSub"></p>
+    </div>
+    <ul class="update-notes" id="updateNotes" hidden></ul>
+    <p class="update-msg" id="updateMsg" aria-live="polite" hidden></p>
+    <div class="update-progress" id="updateProgress" hidden>
+      <div class="update-track"><span id="updateBar"></span></div>
+      <span class="update-pct" id="updatePct">0%</span>
+    </div>
+    <div class="update-actions" id="updateActions">
+      <button class="btn-secondary" id="updateLater" type="button">Not now</button>
+      <button class="btn-primary" id="updateGo" type="button">Update</button>
+    </div>
+  </section>
+
+  <section class="slip" aria-label="Converter">
+    <div class="legs">
+      <div class="leg">
+        <button class="pick" id="pickFrom" type="button" aria-haspopup="dialog">
+          <span class="code" id="fromCode">USD</span><span class="name" id="fromName">US Dollar</span>
+        </button>
+        <div class="amount-wrap" id="fromWrap"><span class="sym" id="fromSym" aria-hidden="true"></span><input class="amount" id="fromAmount" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="0"></div>
+        <span class="calc" id="fromCalc" hidden></span>
+        <button class="incl" id="fromFee" type="button" aria-haspopup="dialog" hidden></button>
+      </div>
+      <div class="leg">
+        <button class="pick" id="pickTo" type="button" aria-haspopup="dialog">
+          <span class="code" id="toCode">EUR</span><span class="name" id="toName">Euro</span>
+        </button>
+        <div class="amount-wrap" id="toWrap"><span class="sym" id="toSym" aria-hidden="true"></span><input class="amount" id="toAmount" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="0"></div>
+        <span class="calc" id="toCalc" hidden></span>
+        <button class="incl" id="toFee" type="button" aria-haspopup="dialog" hidden></button>
+      </div>
+      <button class="swap" id="swap" type="button" aria-label="Swap currencies">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2v11M2 10l3 3 3-3M11 14V3M8 6l3-3 3 3"/></svg>
+      </button>
+    </div>
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+    <div class="statusline" id="statusLine">
+      <p class="rate-main" id="rateMain">Waiting for rates</p>
+      <button class="status" id="status" type="button" hidden></button>
+    </div>
+  </section>
+
+  <section class="section" id="trendSection">
+    <div class="section-head">
+      <h2>Trend<span class="change" id="trendChange"></span></h2>
+      <div class="range" role="group" aria-label="Trend range" id="range">
+        <button type="button" data-days="7" aria-pressed="false" aria-label="1 week">1W</button>
+        <button type="button" data-days="30" aria-pressed="true" aria-label="1 month">1M</button>
+        <button type="button" data-days="365" aria-pressed="false" aria-label="1 year">1Y</button>
+      </div>
+    </div>
+    <div class="trend" id="trend"></div>
+    <div class="trend-axis" id="trendAxis"></div>
+    <p class="trend-note" id="trendNote" hidden></p>
+  </section>
+
+  <footer class="foot"><a href="https://www.exchangerate-api.com" rel="noreferrer">Rates By Exchange Rate API</a></footer>
+</main>
+
+<div class="ops" id="ops" hidden>
+  <button type="button" data-op="+" aria-label="Plus">+</button>
+  <button type="button" data-op="−" aria-label="Minus">−</button>
+  <button type="button" data-op="×" aria-label="Times">×</button>
+  <button type="button" data-op="÷" aria-label="Divided by">÷</button>
+</div>
+
+<dialog id="picker" aria-label="Choose a currency" tabindex="-1">
+  <div class="picker-head">
+    <button class="icon-btn" type="button" id="pickerClose" aria-label="Back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12H3M10.5 4.5 3 12l7.5 7.5"/></svg></button>
+    <input id="pickerSearch" type="search" placeholder="Currency or country" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Search currencies">
+    <button class="clear-btn" id="pickerClear" type="button" aria-label="Clear" hidden><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button>
+  </div>
+  <ul class="picker-list" id="pickerList"></ul>
+</dialog>
+
+<!-- Settings: the fee the bank or the card adds, which applies as it is typed, and (in
+     the Android app only) the rate alert: its row opens the rate to be told of -->
+<dialog class="page" id="settingsDlg" aria-labelledby="settingsTitle">
+  <div class="picker-head">
+    <button class="icon-btn" type="button" id="settingsClose" aria-label="Back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12H3M10.5 4.5 3 12l7.5 7.5"/></svg></button>
+    <h2 id="settingsTitle" tabindex="-1" autofocus>Settings</h2>
+  </div>
+  <div class="about-body">
+    <div class="about-links">
+      <label class="about-row"><span>Fee</span><span class="row-field"><input class="inline-in" id="feeInput" type="text" inputmode="decimal" maxlength="5" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="0" aria-label="Bank or card fee in percent, blank for none"><span aria-hidden="true">%</span></span></label>
+    </div>
+    <p class="page-note" id="rateSub"></p>
+    <div class="about-links">
+      <button class="about-row" type="button" id="alertBtn" aria-expanded="false" aria-controls="alertRow" aria-label="Set a rate alert" hidden><span>Rate alert</span><span id="alertVal"></span></button>
+      <div id="alertRow" hidden>
+        <label class="about-row"><span id="alertWhen">Alert when 1 USD reaches</span><span class="row-field"><input class="inline-in" id="alertTarget" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" spellcheck="false"><span id="alertCode">EUR</span></span></label>
+        <div class="about-row alert-acts">
+          <p class="alert-hint" id="alertHint" aria-live="polite"></p>
+          <div class="alert-btns">
+            <button class="link" id="alertAllow" type="button" hidden>Allow</button>
+            <button class="link" id="alertRemove" type="button" hidden>Remove</button>
+            <button class="link" id="alertSet" type="button">Set</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- About: the version, and the way to the policy, the terms and us -->
+<dialog class="page" id="aboutDlg" aria-labelledby="aboutTitle">
+  <div class="picker-head">
+    <button class="icon-btn" type="button" id="aboutClose" aria-label="Back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12H3M10.5 4.5 3 12l7.5 7.5"/></svg></button>
+    <h2 id="aboutTitle" tabindex="-1" autofocus>About</h2>
+  </div>
+  <div class="about-body">
+    <div class="about-id">
+      <img src="icons/icon-192.png" width="52" height="52" alt="" onerror="this.hidden=true">
+      <p class="about-name">Bureau</p>
+      <p class="about-tag">Live rates for currencies and coins.</p>
+    </div>
+    <div class="about-links">
+      <p class="about-row" id="aboutVer" hidden></p>
+      <button class="about-row" type="button" id="aboutCheck" hidden><span>Check for updates</span><span id="aboutNote" aria-live="polite"></span></button>
+    </div>
+    <div class="about-links">
+      <a class="about-row" href="mailto:support@teloone.au?subject=Bureau"><span>Contact support<small>support@teloone.au</small></span></a>
+      <div class="about-legal"><a class="about-row" href="https://teloone.au/apps/bureau/privacy/" rel="noreferrer">Privacy policy</a><a class="about-row" href="https://teloone.au/apps/bureau/terms/" rel="noreferrer">Terms of use</a></div>
+    </div>
+    <p class="about-foot">Rates are for information only.<br>From Coinbase, Exchange Rate API,<br>Frankfurter and currency-api.<br>Made in Adelaide by Telo One</p>
+  </div>
+</dialog>
+
+<script src="lib.js?v=6"></script>
+<script src="pwa.js"></script>
+<script>
+(() => {
+  // A page and a lib.js from different releases can meet right after one (an
+  // edge or saved copy of one but not the other). Fetch lib.js afresh and load
+  // again, once; a second miss runs anyway rather than loop.
+  const LIB = 6;
+  if (!window.BureauLib || BureauLib.VERSION !== LIB) {
+    let tried = true;
+    try { tried = sessionStorage.getItem('bureau.libRetry') === String(LIB); sessionStorage.setItem('bureau.libRetry', String(LIB)); } catch {}
+    if (!tried) {
+      fetch(`lib.js?v=${LIB}`, { cache: 'reload' }).catch(() => {}).finally(() => location.reload());
+      return;
+    }
+  }
+  try { sessionStorage.removeItem('bureau.libRetry'); } catch {}
+  const $ = id => document.getElementById(id);
+  // The iPhone app passes the phone's own language and region, which the page isn't always told.
+  const locale = (window.bureauApp && window.bureauApp.locale) || navigator.language || 'en-US';
+  // Coinbase's live rates come first, for currencies and the ten coins. ExchangeRate-API's
+  // daily rates check them, and stand in if Coinbase is down; the daily file, which has
+  // two mirrors, stands in behind that and brings the coins.
+  const LIVE_URL = 'https://api.coinbase.com/v2/exchange-rates?currency=USD';
+  const DAILY_URL = 'https://open.er-api.com/v6/latest/USD';
+  const FILE_URLS = [
+    'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json',
+    'https://latest.currency-api.pages.dev/v1/currencies/usd.min.json',
+  ];
+  const TREND_URL = 'https://api.frankfurter.dev/v1/';
+  const REFRESH_MS = 60_000;
+  const DAILY_REFRESH_MS = 60 * 60_000;
+  const FILE_FRESH_MS = 2 * 24 * 60 * 60_000;
+  const TREND_TTL_MS = 6 * 60 * 60_000;
+  const FETCH_TIMEOUT_MS = 8000;
+  const GRACE_MS = 2000;       // how long a source gets before its backup is asked too
+  const LATE_MS = 1500;        // on a first launch, how long the daily rates wait for the live ones
+
+  const COMMON = ['USD', 'EUR', 'GBP', 'AUD', 'JPY', 'CAD', 'CHF', 'CNY', 'NZD', 'INR', 'SGD', 'HKD'];
+  const { CRYPTO } = BureauLib;
+
+  // Always Latin digits, so whatever we write into a field we can parse back.
+  let fmtLocale = locale;
+  try { fmtLocale = new Intl.Locale(locale, { numberingSystem: 'latn' }).toString(); } catch {}
+  const sepParts = new Intl.NumberFormat(fmtLocale).formatToParts(12345.6);
+  const sepOf = type => (sepParts.find(p => p.type === type) || {}).value;
+  let GROUP = sepOf('group') || ',';
+  // An iPhone's number format can be set apart from its language (English with a
+  // decimal comma), and its keypad follows that setting. The app passes the phone's
+  // decimal and thousands marks; where they differ from the language's, amounts are
+  // read and written with them. Nowhere else.
+  let marks = null;
+  {
+    const a = window.bureauApp, dec = a && a.ios && a.decimal, grp = a && a.ios && a.group;
+    if ((dec === '.' || dec === ',') && typeof grp === 'string' && /^[.,'’\s]$/.test(grp) && grp !== dec
+      && (dec !== sepOf('decimal') || grp !== GROUP)) {
+      marks = { decimal: dec, group: grp };
+      GROUP = grp;
+    }
+  }
+
+  let names = null;
+  try { names = new Intl.DisplayNames([locale], { type: 'currency' }); } catch {}
+  const nameCache = new Map();
+  function nameOf(code) {
+    if (CRYPTO[code]) return CRYPTO[code];
+    let n = nameCache.get(code);
+    if (n === undefined) {
+      try { n = (names && names.of(code)) || code; } catch { n = code; }
+      if (n === code) n = BureauLib.NAMES[code] || code;
+      nameCache.set(code, n);
+    }
+    return n;
+  }
+  // Currencies in use today (lib.js REGIONS), not every code the browser knows.
+  const isFiat = BureauLib.isCurrency;
+  const isKnown = code => typeof code === 'string' && (!!CRYPTO[code] || isFiat(code));
+  // A saved code that was withdrawn moves to its replacement; one with none is dropped.
+  const settle = code => { const c = BureauLib.currentCode(code); return isKnown(c) ? c : null; };
+
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem('bureau.' + k)); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem('bureau.' + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ---- state ----
+  let region = '';
+  try { region = new Intl.Locale(locale).maximize().region || ''; } catch { region = (locale.split('-').pop() || '').toUpperCase(); }
+  // Your own money, from the phone's region: where the converter starts, and the side a fee makes dearer.
+  const home = BureauLib.currencyOf(region) || 'USD';
+  const saved = store.get('pair') || {};
+  const state = {
+    from: settle(saved.from) || home,
+    to: settle(saved.to) || (home === 'USD' ? 'EUR' : 'USD'),
+    edited: 'from',
+    fee: Number(store.get('fee')) || 0,
+    days: [7, 30, 365].includes(store.get('days')) ? store.get('days') : 30,
+    recent: [...new Set((store.get('recent') || []).map(settle).filter(Boolean))].slice(0, 5),
+    rates: null,        // units per 1 USD: fiat and coins together
+    fiat: null,
+    coins: null,
+    fiatAt: 0,          // when each half dates from: now for live rates, else as published
+    coinAt: 0,
+    dated: {},          // with live rates, the currencies on their daily rate, and its time
+    source: '',         // 'live' | 'daily'
+    fetchedAt: 0,       // when a refresh last worked
+    error: false
+  };
+  if (state.from === state.to) state.to = state.from === 'USD' ? 'EUR' : 'USD';
+  let reference = store.get('daily');     // { fiat, updatedAt, fetchedAt }: ExchangeRate-API's, the yardstick
+  if (!reference || !reference.fiat) reference = null;
+  // Rates saved in the older shape aren't kept: the first refresh replaces them.
+  const cached = store.get('rates');
+  if (cached && cached.v === 2 && cached.fiat && Object.keys(cached.fiat).length) {
+    Object.assign(state, { fiat: cached.fiat, coins: cached.coins || {}, fiatAt: cached.fiatAt || 0, coinAt: cached.coinAt || 0, dated: cached.dated || {}, source: cached.source === 'live' ? 'live' : 'daily', fetchedAt: cached.fetchedAt || 0 });
+    state.rates = { ...state.fiat, ...state.coins };
+  }
+
+  // ---- numbers ----
+  // Pure helpers live in lib.js (tested in CI); these bind them to this locale.
+  const { fractionDigits } = BureauLib;
+  // Coins get decimals to suit their price (see cryptoDigits).
+  const usdPrice = code => (state.rates && state.rates[code] > 0 ? 1 / state.rates[code] : undefined);
+  const amountOpts = (n, code) => BureauLib.amountOpts(n, code, usdPrice(code));
+  // Arabic, Persian, Hindi and Bengali digits are read as 0 to 9. The Arabic decimal
+  // mark becomes whichever of . and , can't be taken for grouping here; the Arabic
+  // thousands mark is dropped.
+  const POINT = GROUP === '.' ? ',' : '.';
+  const ascii = s => String(s)
+    .replace(/[\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u09E6-\u09EF]/g, c => { const n = c.charCodeAt(0); return String(n < 0x0900 ? n & 15 : (n & 15) - 6); })
+    .replace(/\u066B/g, POINT).replace(/\u066C/g, '');
+  const parseNumber = s => BureauLib.parseNumber(ascii(s), GROUP);
+  // A sum still being typed ("100+") is read without its last sign, so its answer stays.
+  const evaluate = text => BureauLib.evaluate(ascii(text).replace(/[\s+\-*/×÷−–xX]+$/, ''), GROUP);
+  // Building a formatter is far slower than using one, and a render formats
+  // dozens of numbers with a handful of option sets, so each set is built once.
+  const formatters = new Map();
+  function nf(opts) {
+    const key = JSON.stringify(opts);
+    let f = formatters.get(key);
+    if (!f) {
+      f = new Intl.NumberFormat(fmtLocale, opts);
+      if (marks) {
+        // The same number, with the phone's own marks in place of the language's.
+        const plain = f;
+        f = {
+          format: n => plain.formatToParts(n).map(p => (p.type === 'group' ? marks.group : p.type === 'decimal' ? marks.decimal : p.value)).join(''),
+          formatToParts: n => plain.formatToParts(n),
+        };
+      }
+      formatters.set(key, f);
+    }
+    return f;
+  }
+  const dateFormatters = new Map();
+  function df(opts) {
+    const key = JSON.stringify(opts);
+    let f = dateFormatters.get(key);
+    if (!f) { f = new Intl.DateTimeFormat(fmtLocale, opts); dateFormatters.set(key, f); }
+    return f;
+  }
+  const fmtAmount = (n, code) => Number.isFinite(n) ? nf(amountOpts(n, code)).format(n) : '';
+  const fmtRate = r => nf(r >= 100 ? { maximumFractionDigits: 2 } : { maximumSignificantDigits: 5 }).format(r);
+
+  // ---- rates ----
+  const rate = (from, to) => (state.rates && state.rates[from] > 0 && state.rates[to] > 0) ? state.rates[to] / state.rates[from] : NaN;
+  // The fee costs you either way round: a price turned into your home money comes out dearer.
+  const effectiveRate = (from, to) => BureauLib.withFee(rate(from, to), state.fee, to, home);
+
+  async function getJSON(url) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+    try {
+      const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+      if (!res.ok) { const e = new Error('HTTP ' + res.status); e.status = res.status; throw e; }
+      return await res.json();
+    } finally { clearTimeout(timer); }
+  }
+  async function fetchLive() {
+    const json = await getJSON(LIVE_URL);
+    const out = {};
+    for (const [k, v] of Object.entries((json.data && json.data.rates) || {})) {
+      const n = parseFloat(v);
+      if (n > 0) out[k] = n;
+    }
+    if (!out.EUR) throw new Error('Live rates incomplete');
+    out.USD = 1;
+    return out;
+  }
+  async function fetchDaily() {
+    return BureauLib.dailyRates(await getJSON(DAILY_URL), isFiat);
+  }
+  const wait = (ms, value) => new Promise(done => setTimeout(done, ms, value));
+  // The first mirror answers unless it fails or is serving an old file; then the
+  // newest wins. The second is asked only then, or if the first is still out after
+  // GRACE_MS, so one that hangs costs no more than its timeout.
+  async function fetchFile() {
+    const get = url => getJSON(url).then(json => BureauLib.fileRates(json, isFiat)).catch(() => null);
+    const fresh = file => !!file && Date.now() - file.updatedAt < FILE_FRESH_MS;
+    const firstP = get(FILE_URLS[0]);
+    const early = await Promise.race([firstP, wait(GRACE_MS, 'late')]);
+    if (early !== 'late' && fresh(early)) return early;
+    const [first, second] = await Promise.all([firstP, get(FILE_URLS[1])]);
+    if (fresh(first)) return first;
+    return [first, second].filter(Boolean).sort((a, b) => b.updatedAt - a.updatedAt)[0] || null;
+  }
+
+  // One refresh at a time: asking again while one runs joins it. `checking` is a
+  // tap on the status line waiting for the answer.
+  let loading = null, checking = false;
+  const loadRates = () => loading || (loading = fetchRates().finally(() => {
+    loading = null;
+    // Even a refresh that broke stops saying "Checking…".
+    if (checking) { checking = false; renderStatus(); }
+  }));
+  async function fetchRates() {
+    const attempt = get => get().catch(() => null);
+    const keepDaily = daily => { if (daily) { reference = { ...daily, fetchedAt: Date.now() }; store.set('daily', reference); } };
+    const needDaily = !reference || Date.now() - (reference.fetchedAt || 0) > DAILY_REFRESH_MS;
+    const liveP = attempt(fetchLive);
+    const firstP = needDaily ? attempt(fetchDaily) : null;
+    // A first launch has nothing to show while Coinbase hangs: once the daily rates are
+    // in, it gets LATE_MS more and then they show. Its answer still replaces them.
+    if (!state.rates && firstP) firstP.then(async daily => {
+      // (Not for a pair the daily rates cannot price, such as one with a coin: that waits.)
+      if (!daily || !(daily.fiat && daily.fiat[state.from] > 0 && daily.fiat[state.to] > 0)) return;
+      if (await Promise.race([liveP, wait(LATE_MS)]) || state.rates) return;
+      keepDaily(daily);
+      show(BureauLib.combineRates(state, daily, null));
+    });
+    // Coinbase answers within a second or so. If it fails, or a connection hangs past
+    // GRACE_MS, the other two start now rather than after its timeout; its answer
+    // still wins if it comes.
+    const early = await Promise.race([liveP, wait(GRACE_MS, 'late')]);
+    const backupP = early && early !== 'late' ? null : firstP || attempt(fetchDaily);
+    const fileP = backupP ? attempt(fetchFile) : null;
+    const live = await liveP;
+    // Without Coinbase, every refresh goes on to the other two.
+    const daily = await (live ? firstP : backupP);
+    keepDaily(daily);
+    // Coinbase won late: daily rates asked for meanwhile still count as the hour's
+    // check when they come, without holding up the live ones.
+    if (live && backupP && backupP !== firstP) backupP.then(keepDaily);
+    const file = !live || !reference ? await (fileP || attempt(fetchFile)) : null;
+    const yardstick = reference || file;
+    show(live ? BureauLib.liveRates(live, yardstick && yardstick.fiat, isFiat, Date.now(), yardstick && yardstick.updatedAt) : BureauLib.combineRates(state, daily, file), !!live);
+  }
+  // Takes up what a refresh brought (`live`: from Coinbase), saves it and draws it.
+  function show(next, live) {
+    state.error = !!next.offline;
+    if (!next.offline) {
+      const source = live ? 'live' : next.fiatAt > state.fiatAt ? 'daily' : state.source;
+      Object.assign(state, { fiat: next.fiat, coins: next.coins || {}, fiatAt: next.fiatAt, coinAt: next.coinAt, dated: next.dated || {}, source, fetchedAt: Date.now() });
+      state.rates = { ...state.fiat, ...state.coins };
+      store.set('rates', { v: 2, fiat: state.fiat, coins: state.coins, fiatAt: state.fiatAt, coinAt: state.coinAt, dated: state.dated, source, fetchedAt: state.fetchedAt });
+    }
+    checking = false;
+    buildCurrencyList();
+    renderAll(true);
+    refreshTrend();
+  }
+
+  // ---- currency list ----
+  // Rebuilt only when the set of currencies changes, not on every refresh.
+  let currencies = [], currencySet = '';
+  const collator = new Intl.Collator(locale);
+  function buildCurrencyList() {
+    if (!state.rates) return;
+    // All ten coins stay listed; one with no rate today says so in the picker.
+    const codes = [...Object.keys(state.fiat || {}).filter(isFiat), ...Object.keys(CRYPTO)];
+    const set = [...codes].sort().join();
+    if (set === currencySet) return;
+    currencySet = set;
+    currencies = codes.sort((a, b) => collator.compare(nameOf(a), nameOf(b)));
+  }
+  buildCurrencyList();
+
+  // ---- render ----
+  // £, $, € and so on; nothing for crypto or where the symbol is just the code.
+  function symbolOf(code) {
+    if (CRYPTO[code]) return '';
+    try {
+      const part = nf({ style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' }).formatToParts(1).find(p => p.type === 'currency');
+      return part && part.value !== code ? part.value : '';
+    } catch { return ''; }
+  }
+
+  function renderPair() {
+    for (const side of ['from', 'to']) {
+      const code = state[side];
+      $(side + 'Code').textContent = code;
+      $(side + 'Name').textContent = nameOf(code);
+      $(side + 'Sym').textContent = symbolOf(code);
+      $('pick' + (side === 'from' ? 'From' : 'To')).setAttribute('aria-label', `${side === 'from' ? 'You have' : 'You get'} ${nameOf(code)}. Change currency`);
+      $(side + 'Amount').setAttribute('aria-label', `Amount in ${nameOf(code)}`);
+    }
+    document.title = `${state.from} → ${state.to} · Bureau`;
+  }
+
+  const field = side => $(side + 'Amount');
+  const other = side => side === 'from' ? 'to' : 'from';
+
+  // Writes only into the field you're not editing, so a refresh never touches what you type.
+  // A refresh (`hold`) leaves the answer alone too while it has focus: you tapped it to
+  // type over it, and a rewrite would drop the selection. It catches up when you type
+  // in it or leave it. Anything you do yourself rewrites it at once.
+  let answerBehind = false;
+  function convert(hold) {
+    const src = state.edited, dst = other(src);
+    // For the page's colours only: the amount you typed is the blue one.
+    field(src).closest('.legs').dataset.edited = src;
+    const { value, isExpr } = evaluate(field(src).value);
+    const hint = $(src + 'Calc');
+    hint.hidden = !(isExpr && Number.isFinite(value) && value >= 0);
+    if (!hint.hidden) hint.textContent = '= ' + fmtAmount(value, state[src]);
+    $(dst + 'Calc').hidden = true;
+
+    const r = effectiveRate(state.from, state.to);
+    let out = NaN;
+    if (Number.isFinite(value) && value >= 0 && Number.isFinite(r)) out = src === 'from' ? value * r : value / r;
+    // A fee changes the answer, so the answer's card says so, in the place a sum's
+    // result has in the other ("incl. 2.5% fee"). With no fee, or no answer yet, nothing.
+    const fee = state.fee > 0 ? `${fmtPct(state.fee)}%` : '';
+    for (const side of [src, dst]) {
+      const note = $(side + 'Fee');
+      note.hidden = !fee || side !== dst || !Number.isFinite(out);
+      note.textContent = note.hidden ? '' : `incl. ${fee} fee`;
+      note.setAttribute('aria-label', `Bank or card fee: ${fee || 'none'}. Change`);
+    }
+    answerBehind = !!hold && document.activeElement === field(dst);
+    if (!answerBehind) field(dst).value = fmtAmount(out, state[dst]);
+    // With no rate there's no answer yet, and a 0 would read like one. The same goes
+    // for something typed that has no value ("5-10", "1/0").
+    field(src).placeholder = Number.isFinite(r) ? '0' : '–';
+    field(dst).placeholder = Number.isFinite(r) && !field(src).value.trim() ? '0' : '–';
+    fitAll();
+    store.set('amount', { side: src, value: field(src).value });
+    tellAppPair();
+  }
+
+  // Read the answer out after something the user did (typing, a swap, a new
+  // currency or fee), never after the minute's refresh.
+  let announceTimer = 0;
+  function announce() {
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(() => {
+      const a = field('from').value, b = field('to').value;
+      $('announce').textContent = a && b ? `${a} ${nameOf(state.from)} is ${b} ${nameOf(state.to)}` : '';
+    }, 700);
+  }
+
+  // Long amounts shrink to fit instead of being cut off, though not on an iPhone
+  // below the 16px that stops it zooming into the field.
+  const smallest = CSS.supports('-webkit-touch-callout', 'none') ? 16 : 0;
+  // Whether an amount is wider than its room. Measured with a ruler of our own:
+  // browsers disagree about a field's scrollWidth, and Safari's said every amount
+  // was too wide, which hid the currency's name on an iPhone.
+  const ruler = document.createElement('span');
+  ruler.setAttribute('aria-hidden', 'true');
+  ruler.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre;pointer-events:none';
+  document.body.appendChild(ruler);
+  // The phone's text size setting scales every font size, and a size read back comes
+  // scaled: written as it is, it would be scaled again. So it is divided by the scale
+  // first, which is measured once, on the ruler at a known size. The sizes in fit and
+  // fitAll are all as written, before that scale.
+  ruler.style.fontSize = '100px';
+  const textScale = parseFloat(getComputedStyle(ruler).fontSize) / 100 || 1;
+  function over(input) {
+    const wrap = input.parentElement, sym = wrap.querySelector('.sym');
+    let room = wrap.clientWidth;
+    if (!room) return false;
+    if (sym && sym.offsetWidth) room -= sym.offsetWidth + 6;
+    const cs = getComputedStyle(input);
+    for (const k of ['fontFamily', 'fontWeight', 'fontStyle', 'letterSpacing', 'fontVariantNumeric', 'fontFeatureSettings']) ruler.style[k] = cs[k];
+    ruler.style.fontSize = parseFloat(cs.fontSize) / textScale + 'px';
+    ruler.textContent = input.value || input.placeholder || '';
+    return ruler.getBoundingClientRect().width > room - 1;
+  }
+  function fit(input, floor = 15) {
+    input.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(input).fontSize) / textScale;
+    while (over(input) && size > floor) {
+      size = Math.max(size * 0.92, floor);
+      input.style.fontSize = Math.max(size, smallest) + 'px';
+    }
+  }
+  // If it still doesn't fit (big text on a small phone), the fee's note beside it goes
+  // under it, and the amount has the card's width. Failing that it is drawn smaller
+  // yet, so no digit is hidden.
+  function fitLeg(input) {
+    const leg = input.closest('.leg');
+    leg.classList.remove('under');
+    fit(input);
+    if (over(input) && !leg.querySelector('.incl').hidden) { leg.classList.add('under'); fit(input); }
+    if (over(input)) fit(input, 10);
+  }
+  // Both amounts are drawn the same size: each is fitted, then the larger comes down to the
+  // smaller, though never under 15px for the sake of one squeezed far past that.
+  const fitAll = () => {
+    const pair = [field('from'), field('to')];
+    pair.forEach(input => fitLeg(input));
+    const sizes = pair.map(input => parseFloat(getComputedStyle(input).fontSize) / textScale);
+    const size = Math.max(Math.min(...sizes), 15);
+    pair.forEach((input, i) => { if (sizes[i] > size) input.style.fontSize = size + 'px'; });
+  };
+
+  // The line under the amounts: the rate, beside how old it is (see renderStatus).
+  // With no rates at all and none to be had, that other half says so and this is blank.
+  function renderRateLine() {
+    renderBell();
+    // The alert's open rows keep their "x% above now" true to the rate.
+    if (!$('alertRow').hidden) renderAlertHint();
+    const r = rate(state.from, state.to);
+    // Sharing is the iPhone app's, and only once there is a rate to share.
+    $('shareBtn').hidden = !ios || !Number.isFinite(r);
+    const main = $('rateMain'), sub = $('rateSub');
+    if (!Number.isFinite(r)) {
+      const missing = [state.from, state.to].filter(c => !(state.rates && state.rates[c] > 0));
+      main.textContent = !state.rates ? (state.error ? '' : 'Waiting for rates')
+        : `No rate for ${missing.join(' or ')} today`;
+      sub.textContent = '';
+      return;
+    }
+    const eff = effectiveRate(state.from, state.to);
+    main.innerHTML = `1 ${state.from} = <b>${fmtRate(eff)}</b> ${state.to}`;
+    // Only with a fee is there a second rate worth a line: it is in Settings, under the fee.
+    sub.textContent = state.fee ? `Without the fee, 1 ${state.from} = ${fmtRate(r)} ${state.to}` : '';
+  }
+
+  // ---- Settings: the fee ----
+  // Settings is a page like About, opened from the menu. Its first row is the fee: a
+  // bare percent field that applies as you type. Blank is no fee. A fee changes the
+  // answer, so while there is one the answer's card says so (see convert); a tap on
+  // that opens Settings too.
+  const fmtPct = n => nf({ maximumFractionDigits: 2 }).format(n);
+  const settings = $('settingsDlg');
+  let feeBefore = 0;
+  function setFee(n) {
+    state.fee = n;
+    store.set('fee', state.fee);
+    renderAll();
+    announce();
+  }
+  // The page's name takes focus, never a field: the keyboard waits for a tap.
+  function openSettings() {
+    closeAlert();
+    feeBefore = state.fee;
+    $('feeInput').value = state.fee ? fmtPct(state.fee) : '';
+    $('feeInput').removeAttribute('aria-invalid');
+    settings.showModal();
+    $('settingsTitle').focus();
+    syncBack();
+  }
+  settings.addEventListener('close', () => { closeAlert(); syncBack(); });
+  $('settingsClose').addEventListener('click', () => settings.close());
+  settings.addEventListener('click', e => { if (e.target === settings) settings.close(); });
+  // Escape in the fee's field puts back the fee from before and leaves the field, not the page.
+  settings.addEventListener('cancel', e => {
+    if (document.activeElement !== $('feeInput')) return;
+    e.preventDefault();
+    if (state.fee !== feeBefore) setFee(feeBefore);
+    $('feeInput').value = state.fee ? fmtPct(state.fee) : '';
+    $('feeInput').removeAttribute('aria-invalid');
+    $('feeInput').blur();
+  });
+
+  // ---- rate alerts (in the app only) ----
+  // The app keeps the alerts and checks them in the background; the page
+  // holds a copy for Settings. One alert per pair, on the plain
+  // rate; its direction comes from the target vs the rate now.
+  let alerts = [], notifyOn = true;
+  const alertFor = (from, to) => alerts.find(a => a.from === from && a.to === to);
+  // "Rate alert" in Settings, with this pair's target beside it while it has one.
+  function renderBell() {
+    const a = alertFor(state.from, state.to);
+    $('alertVal').textContent = a ? `${fmtRate(a.target)} ${state.to}` : '';
+    $('alertBtn').setAttribute('aria-label', a ? `Rate alert at ${fmtRate(a.target)} ${state.to}. Change` : 'Set a rate alert');
+  }
+  // Its rows say how far the target is from now. An alert already set at the
+  // typed rate offers Remove instead of Set; with notifications off, Allow comes
+  // first (Set still asks Android for permission).
+  function renderAlertHint() {
+    const r = rate(state.from, state.to), a = alertFor(state.from, state.to);
+    const typed = $('alertTarget').value.trim();
+    const t = parseNumber(typed);
+    // Against the target as the field shows it: a rounded one still reads as set.
+    const isSet = !!a && t > 0 && Math.abs(t / parseNumber(fmtRate(a.target)) - 1) < 1e-9;
+    let text = '';
+    if (!notifyOn) text = 'Notifications off';
+    else if (Number.isFinite(t) && t > 0 && Number.isFinite(r)) {
+      const diff = (t / r - 1) * 100;
+      text = Math.abs(diff) < 0.01 ? 'The rate now' : `${fmtPct(Math.abs(diff))}% ${diff > 0 ? 'above' : 'below'} now`;
+    } else if (typed) text = 'Enter a rate';   // something typed that is no rate
+    else if (Number.isFinite(r)) text = `Now ${fmtRate(r)}`;
+    $('alertHint').textContent = text;
+    $('alertAllow').hidden = notifyOn;
+    $('alertRemove').hidden = !isSet;
+    $('alertSet').hidden = isSet;
+  }
+  // The "Rate alert" row opens the alert's rows under it, and puts them away again.
+  // Nothing takes focus: the keyboard waits for a tap on the field.
+  function openAlert() {
+    const a = alertFor(state.from, state.to), r = rate(state.from, state.to);
+    $('alertCode').textContent = state.to;
+    $('alertWhen').textContent = `Alert when 1 ${state.from} reaches`;
+    $('alertTarget').setAttribute('aria-label', `Alert when 1 ${state.from} reaches, in ${state.to}`);
+    $('alertTarget').value = a ? fmtRate(a.target) : (Number.isFinite(r) ? fmtRate(r) : '');
+    $('alertRow').hidden = false;
+    $('alertBtn').setAttribute('aria-expanded', 'true');
+    renderAlertHint();
+  }
+  function closeAlert() {
+    $('alertRow').hidden = true;
+    $('alertBtn').setAttribute('aria-expanded', 'false');
+  }
+  function setAlert() {
+    const t = parseNumber($('alertTarget').value.trim()), r = rate(state.from, state.to);
+    if (!(t > 0) || !Number.isFinite(r) || Math.abs(t / r - 1) < 1e-4) {
+      // Said under the field, so Set never does nothing: no rate there, or the rate as it is now.
+      if (!(t > 0)) $('alertHint').textContent = 'Enter a rate';
+      else if (Number.isFinite(r)) $('alertHint').textContent = 'Pick one above or below now';
+      return $('alertTarget').focus();
+    }
+    const alert = { from: state.from, to: state.to, target: t, above: t > r };
+    alerts = [...alerts.filter(a => a.from !== alert.from || a.to !== alert.to), alert];
+    toApp({ type: 'setAlert', ...alert });
+    haptic();
+    closeAlert();
+    renderBell();
+  }
+  function removeAlert() {
+    alerts = alerts.filter(a => a.from !== state.from || a.to !== state.to);
+    toApp({ type: 'removeAlert', from: state.from, to: state.to });
+    haptic('tick');
+    closeAlert();
+    renderBell();
+  }
+
+  // A day as "2 Nov", with its year when that isn't this one: "2 Nov 2025".
+  const dayOpts = (year, opts) => ({ day: 'numeric', month: 'short', ...(year === new Date().getFullYear() ? null : { year: 'numeric' }), ...opts });
+  // "14:05" (or "2:05 pm") today, otherwise "2 Nov, 14:05".
+  function whenText(ms) {
+    const d = new Date(ms);
+    const time = d.toLocaleTimeString(fmtLocale, { hour: 'numeric', minute: '2-digit' });
+    return d.toDateString() === new Date().toDateString()
+      ? time
+      : `${d.toLocaleDateString(fmtLocale, dayOpts(d.getFullYear()))}, ${time}`;
+  }
+  // The day a daily rate is for, as its source dates it. Sources date by UTC,
+  // so this does too, and "6 Nov" reads the same everywhere.
+  const dayText = ms => new Date(ms).toLocaleDateString(fmtLocale, dayOpts(new Date(ms).getUTCFullYear(), { timeZone: 'UTC' }));
+  // The pair's own date: a coin can be a day behind the currencies, or the
+  // other way round, and the older side is the honest one to show.
+  const pairAt = () => BureauLib.pairUpdatedAt(state.from, state.to, state.fiatAt, state.coinAt, state.dated);
+  // Rates are saved on the device after every refresh, so the app keeps
+  // working offline. This line always says how old the rates in use are,
+  // and a pair on a daily rate never reads as live.
+  function renderStatus() {
+    const el = $('status');
+    let text = '';
+    // No rates saved and none to be had: this one line says so, with its arrow to try again.
+    const none = !state.rates && state.error;
+    document.body.classList.toggle('norates', none);
+    if (checking) text = 'Checking…';
+    else if (!state.rates) text = none ? 'No rates yet. Check your connection.' : '';
+    else {
+      const { kind, at, byDay } = BureauLib.rateStatus(state, Number.isFinite(rate(state.from, state.to)), Date.now());
+      const when = byDay ? dayText(at) : whenText(at);
+      text = {
+        offline: `Offline · rates from ${when}`,
+        daily: `Daily rates from ${when}`,
+        dailyPair: `Daily rate from ${when}`,
+        stale: `Rates from ${when}`,
+        live: `Live · ${when}`,
+      }[kind];
+    }
+    // While a tap on it is being answered the status keeps the width it had, so
+    // "Checking…" takes the old words' place and the rate beside it stays where it is.
+    if (!checking) el.style.minWidth = '';
+    else if (!el.hidden && !el.style.minWidth) el.style.minWidth = `${el.getBoundingClientRect().width}px`;
+    el.textContent = text;
+    el.hidden = !text;
+    fitStatus();
+  }
+  // For the page's layout only: the rate and the status share a row where the two fit
+  // on it as they are, and otherwise the rate goes over the status (the styles keep
+  // the line's height the same either way). Not while a tap on the status is being
+  // answered: the words change then, the layout doesn't.
+  function fitStatus() {
+    if (checking) return;
+    const line = $('statusLine');
+    line.classList.remove('two');
+    const parts = [$('rateMain'), $('status')].filter(el => !el.hidden && el.textContent);
+    if (parts.length < 2) return;
+    const css = getComputedStyle(line);
+    const room = line.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
+    const need = parts.reduce((w, el) => w + el.getBoundingClientRect().width, 0) + parseFloat(css.columnGap);
+    if (need > room + 0.5) line.classList.add('two');
+  }
+
+  // ---- trend ----
+  // Trend series are kept on the device (the last few pairs and ranges), so
+  // the chart draws at once on launch and refreshes quietly behind it.
+  const trendCache = new Map(Object.entries(store.get('trend') || {}).filter(([, e]) => e && Array.isArray(e.series)));
+  function saveTrend(key, entry) {
+    // Six significant digits is finer than the chart can show and keeps the stored copy small.
+    entry.series = entry.series.map(([d, v]) => [d, Number(v.toPrecision(6))]);
+    trendCache.delete(key);
+    trendCache.set(key, entry);
+    while (trendCache.size > 8) trendCache.delete(trendCache.keys().next().value);
+    store.set('trend', Object.fromEntries(trendCache));
+  }
+  let trendToken = 0;
+  let trendFailed = false;
+  let trendBusy = 0;      // the token of the fetch under way, if any
+  const trendKey = () => `${state.from}${state.to}${state.days}`;
+  function renderRange() {
+    for (const b of $('range').querySelectorAll('button')) b.setAttribute('aria-pressed', String(Number(b.dataset.days) === state.days));
+  }
+  async function renderTrend() {
+    const token = ++trendToken;
+    const { from, to, days } = state;
+    renderRange();
+    const key = trendKey();
+    let entry = trendCache.get(key);
+    const usable = entry && entry.series.length >= 2;
+    if (usable) drawTrend(entry.series, key);
+    if (usable && Date.now() - entry.at < TREND_TTL_MS) return;
+    if (!usable) {
+      $('trend').classList.add('loading');
+      $('trendSection').classList.remove('off');
+      $('trendNote').hidden = true;
+    }
+    trendBusy = token;
+    try {
+      entry = { at: Date.now(), series: await fetchSeries(from, to, days) };
+      saveTrend(key, entry);
+    } catch {
+      if (token !== trendToken) return;
+      trendFailed = true;
+      if (usable) return; // keep showing the saved chart
+      // It tries again with the next rate update.
+      return showTrendEmpty(navigator.onLine === false || state.error ? 'No trend offline' : 'No trend right now');
+    } finally {
+      if (trendBusy === token) trendBusy = 0;
+    }
+    if (token !== trendToken) return;
+    trendFailed = false;
+    if (entry.series.length < 2) return showTrendEmpty(`No trend for ${from} → ${to} yet`);
+    drawTrend(entry.series, key);
+  }
+  // After each rate refresh: a failed or 6-hour-old trend loads again, and
+  // otherwise the chart redraws so its last point is the rate shown above it.
+  function refreshTrend() {
+    if (trendBusy) return;
+    const key = trendKey(), entry = trendCache.get(key);
+    if (trendFailed || (entry && Date.now() - entry.at >= TREND_TTL_MS)) return renderTrend();
+    const scrubbing = !!$('trend').querySelector('.probe-dot:not([hidden])');
+    if (entry && entry.series.length >= 2 && drawnKey === key && !scrubbing) drawTrend(entry.series, key);
+  }
+
+  // Daily ECB reference rates where they exist (one request, every working
+  // day). Crypto and the currencies the ECB doesn't cover come from daily
+  // snapshots of all rates instead, sampled across the range.
+  async function fetchSeries(from, to, days) {
+    if (!CRYPTO[from] && !CRYPTO[to]) {
+      const start = new Date(Date.now() - (days + 1) * 864e5);
+      try {
+        const json = await getJSON(`${TREND_URL}${start.toISOString().slice(0, 10)}..?base=${from}&symbols=${to}`);
+        const series = Object.entries(json.rates || {}).map(([d, v]) => [d, v[to]]).filter(p => Number.isFinite(p[1]));
+        if (series.length >= 2) return series;
+      } catch (e) {
+        if (e.status !== 404 && e.status !== 422) throw e;
+      }
+    }
+    if (BureauLib.FILE_SKIP.has(from) || BureauLib.FILE_SKIP.has(to)) return [];
+    const dates = BureauLib.sampleDates(days, new Date());
+    const snaps = await Promise.all(dates.map(d => dayRates(d).catch(() => null)));
+    if (!snaps.some(Boolean)) throw new Error('No snapshots');
+    return BureauLib.crossSeries(dates, snaps, from, to);
+  }
+  // Past days never change, so each day's file is fetched once and kept in
+  // the browser cache; two mirrors of the same files.
+  const SNAPSHOT_URLS = [
+    d => `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${d}/v1/currencies/usd.min.json`,
+    d => `https://${d}.currency-api.pages.dev/v1/currencies/usd.min.json`,
+  ];
+  const dayCache = new Map();
+  function dayRates(date) {
+    if (!dayCache.has(date)) {
+      const load = (async () => {
+        for (const url of SNAPSHOT_URLS) {
+          try {
+            // AbortSignal.timeout is missing on older WebViews; there the request simply runs on.
+            const signal = AbortSignal.timeout ? AbortSignal.timeout(FETCH_TIMEOUT_MS) : undefined;
+            const res = await fetch(url(date), { cache: 'force-cache', signal });
+            if (res.ok) return await res.json();
+          } catch {}
+        }
+        throw new Error('Snapshot unavailable');
+      })();
+      load.catch(() => dayCache.delete(date));
+      dayCache.set(date, load);
+    }
+    return dayCache.get(date);
+  }
+  // A new pair or range fades in; a quiet refresh of the same chart doesn't.
+  let drawnKey = '';
+  // The day the pair's rate is for, to end the chart on: by this phone's clock for
+  // a live rate, by its own date for a daily one. None on the 1-year chart, whose
+  // points are a fortnight apart, or with no rate.
+  function rateDay() {
+    if (state.days > 31 || !Number.isFinite(rate(state.from, state.to))) return '';
+    const { at, byDay } = BureauLib.rateStatus(state, true, Date.now());
+    if (!(at > 0) || !Number.isFinite(at)) return '';
+    const d = new Date(at);
+    return (byDay ? d : new Date(at - d.getTimezoneOffset() * 60_000)).toISOString().slice(0, 10);
+  }
+  function drawTrend(series, key) {
+    const el = $('trend');
+    el.classList.remove('loading');
+    $('trendSection').classList.remove('off');
+    $('trendNote').hidden = true;
+    const fresh = key !== drawnKey;
+    drawnKey = key;
+    series = BureauLib.withLatest(series, rate(state.from, state.to), rateDay());
+    const vals = series.map(p => p[1]);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const span = max - min || max * 0.001;
+    const W = 300, H = 116, pad = 10;
+    const x = i => (i / (vals.length - 1)) * W;
+    const y = v => pad + (1 - (v - min) / span) * (H - pad * 2);
+    const line = 'M' + vals.map((v, i) => `${x(i).toFixed(2)},${y(v).toFixed(2)}`).join(' L');
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+        <path class="line" d="${line}"/>
+      </svg><span class="end" style="top:${(y(vals.at(-1)) / H * 100).toFixed(2)}%"></span>
+      <span class="probe-line" hidden></span><span class="probe-dot" hidden></span>`;
+    if (fresh && !reduceMotion.matches && el.animate) {
+      el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: 'ease-out' });
+    }
+    const change = (vals.at(-1) / vals[0] - 1) * 100;
+    const changeEl = $('trendChange');
+    changeEl.className = 'change ' + (change >= 0 ? 'up' : 'down');
+    changeEl.textContent = `${change >= 0 ? '+' : '−'}${nf({ minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(change))}%`;
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', `${state.from} to ${state.to}: ${fmtRate(vals[0])} to ${fmtRate(vals.at(-1))}, low ${fmtRate(min)}, high ${fmtRate(max)}`);
+    const long = state.days > 60;
+    const d = s => df(long ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short' }).format(new Date(s + 'T00:00:00'));
+    $('trendAxis').innerHTML = '';
+    for (const [cls, text] of [['', d(series[0][0])], ['mid', `Low ${fmtRate(min)} · High ${fmtRate(max)}`], ['', d(series.at(-1)[0])]]) {
+      const s = document.createElement('span');
+      if (cls) s.className = cls;
+      s.textContent = text;
+      $('trendAxis').append(s);
+    }
+    scrub = { series, y, H, rest: `Low ${fmtRate(min)} · High ${fmtRate(max)}` };
+    fitAxis();
+  }
+  // For the page's layout only: low and high go on a line of their own under the
+  // dates where they don't fit between them (the styles do the rest).
+  function fitAxis() {
+    const axis = $('trendAxis'), mid = axis.querySelector('.mid');
+    axis.classList.remove('stack');
+    if (mid && mid.scrollWidth > mid.clientWidth + 1) axis.classList.add('stack');
+  }
+
+  // Touch or hover the chart to read the rate on a given day. The reading
+  // replaces the low/high line under the chart until you let go.
+  let scrub = null;
+  function scrubAt(clientX) {
+    const el = $('trend');
+    if (!scrub || !el.querySelector('svg')) return;
+    const rect = el.getBoundingClientRect();
+    const width = rect.width - 6;
+    const n = scrub.series.length;
+    const i = Math.round(Math.max(0, Math.min(1, (clientX - rect.left) / width)) * (n - 1));
+    const [date, value] = scrub.series[i];
+    const left = (i / (n - 1)) * width;
+    const top = scrub.y(value) / scrub.H * 100;
+    const lineEl = el.querySelector('.probe-line'), dot = el.querySelector('.probe-dot');
+    lineEl.hidden = dot.hidden = false;
+    lineEl.style.left = left + 'px';
+    dot.style.left = left + 'px';
+    dot.style.top = top + '%';
+    const mid = $('trendAxis').querySelector('.mid');
+    if (mid) {
+      mid.classList.add('active');
+      const day = df(state.days > 60 ? { day: 'numeric', month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short' }).format(new Date(date + 'T00:00:00'));
+      mid.textContent = `${day} · ${fmtRate(value)}`;
+    }
+  }
+  function endScrub() {
+    const el = $('trend');
+    el.querySelectorAll('.probe-line, .probe-dot').forEach(p => { p.hidden = true; });
+    const mid = $('trendAxis').querySelector('.mid');
+    if (mid && scrub) { mid.classList.remove('active'); mid.textContent = scrub.rest; }
+  }
+  $('trend').addEventListener('pointerdown', e => scrubAt(e.clientX));
+  $('trend').addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) scrubAt(e.clientX); });
+  for (const type of ['pointerup', 'pointerleave', 'pointercancel']) $('trend').addEventListener(type, endScrub);
+
+  // No chart box, range or heading: the section folds to one grey line.
+  function showTrendEmpty(msg) {
+    scrub = null;
+    drawnKey = '';
+    const el = $('trend');
+    el.classList.remove('loading');
+    el.removeAttribute('role');
+    el.removeAttribute('aria-label');
+    el.innerHTML = '';
+    $('trendChange').textContent = '';
+    $('trendAxis').innerHTML = '';
+    $('trendNote').textContent = msg;
+    $('trendNote').hidden = false;
+    $('trendSection').classList.add('off');
+  }
+
+  // `hold`: a rate refresh, which leaves a focused answer as it is (see convert).
+  function renderAll(hold) {
+    renderPair();
+    convert(hold);
+    renderRateLine();
+    renderStatus();
+  }
+
+  // ---- Android app bridge (absent in a browser) ----
+  // The app injects window.bureauApp for its own origin only. It uses the pair
+  // for the home-screen widget, the picker state for the Back gesture, and
+  // answers with its version and update checks.
+  const app = window.bureauApp || null;
+  // The iPhone app sets this before the page runs. It has no widget, no Back
+  // gesture and no background checks, so no rate alerts.
+  const ios = !!(app && app.ios);
+  function toApp(msg) {
+    if (!app) return;
+    try { app.postMessage(JSON.stringify(msg)); } catch {}
+  }
+  // A light vibration on taps, as native Android controls give: "tick" for
+  // small steps (keys, ranges), "tap" for actions. Follows the phone's
+  // touch feedback setting.
+  const haptic = (kind = 'tap') => toApp({ type: 'haptic', kind });
+  let pairTimer = 0;
+  function tellAppPair() {
+    if (!app || ios) return;
+    clearTimeout(pairTimer);
+    pairTimer = setTimeout(() => {
+      const r = rate(state.from, state.to);
+      // The home-screen widget shows the "You have" amount (1 shows the plain rate).
+      const amount = evaluate(field('from').value).value;
+      if (Number.isFinite(r)) toApp({ type: 'pair', from: state.from, to: state.to, fee: state.fee, home, rate: r, updatedAt: pairAt(), amount: amount > 0 ? amount : 1 });
+    }, 400);
+  }
+  if (app) {
+    app.onmessage = e => {
+      let m;
+      try { m = JSON.parse(e.data); } catch { return; }
+      if (m.type === 'info') {
+        appVersion = m.version;
+        selfUpdates = m.updates === true;
+        showVersion();
+        $('aboutCheck').hidden = !selfUpdates;
+        showLabel();
+      } else if (m.type === 'updateStatus' && selfUpdates) {
+        if (m.state === 'available') return markUpdateReady();
+        showNote(m.state === 'latest' ? 'Up to date' : "Couldn't check");
+        versionTimer = setTimeout(() => showNote(''), 4000);
+      } else if (m.type === 'alerts') {
+        const list = Array.isArray(m.list) ? m.list.filter(a => a && typeof a.from === 'string' && typeof a.to === 'string' && a.target > 0) : [];
+        // An alert on a withdrawn code could never be seen or removed here, so the app
+        // stops checking it. Its target meant the old money, so it doesn't move on.
+        for (const a of list) if (!isKnown(a.from) || !isKnown(a.to)) toApp({ type: 'removeAlert', from: a.from, to: a.to });
+        alerts = list.filter(a => isKnown(a.from) && isKnown(a.to));
+        notifyOn = m.notify !== false;
+        renderBell();
+        if (!$('alertRow').hidden) renderAlertHint();
+      } else if (m.type === 'showPair') {
+        // Opened from an alert's notification.
+        const from = settle(m.from), to = settle(m.to);
+        if (from && to && from !== to) {
+          closeAlert();
+          state.from = from;
+          state.to = to;
+          savePair();
+          renderAll();
+          renderTrend();
+        }
+      } else if (m.type === 'keyboard' && m.open === false) {
+        // Back hides the keyboard without blurring the field, which left the sign keys
+        // up. The app says when the keyboard has really gone, and the field lets go.
+        const a = document.activeElement;
+        if (a === field('from') || a === field('to')) a.blur();
+      } else if (m.type === 'active') {
+        // The iPhone app is in front again: the page isn't always told it was away.
+        if (Date.now() - state.fetchedAt > REFRESH_MS) loadRates();
+        renderStatus();
+      } else if (m.type === 'update' && selfUpdates) {
+        if (m.state === 'available') updateReady = true;
+        showUpdate(m);
+        showLabel();
+      }
+    };
+    $('updateGo').addEventListener('click', () => {
+      showUpdate({ state: 'downloading', progress: 0 });
+      toApp({ type: 'installUpdate' });
+    });
+    // Put away, the card leaves "Update available" in the menu (and a dot on its button) to bring it back.
+    $('updateLater').addEventListener('click', () => { $('updateCard').hidden = true; markUpdateReady(); });
+    $('alertBtn').hidden = ios;
+    // The iPhone app shares the conversion on screen through the phone's share sheet
+    // (the button shows once there is a rate: see renderRateLine).
+    $('shareBtn').addEventListener('click', () => {
+      if (!Number.isFinite(rate(state.from, state.to))) return;
+      const a = $('fromAmount').value.trim(), b = $('toAmount').value.trim();
+      const sum = a && b ? `${a} ${state.from} = ${b} ${state.to}` : '';
+      // The rate, and on a line of its own what it is without the fee, if one is set.
+      const line = [$('rateMain').textContent.trim(), $('rateSub').textContent.trim()].filter(Boolean).join('\n');
+      // A rate that isn't live says when it is from.
+      const { kind, at, byDay } = BureauLib.rateStatus(state, true, Date.now());
+      const dated = kind !== 'live' && at > 0 ? `Rate from ${byDay ? dayText(at) : whenText(at)}` : '';
+      haptic();
+      toApp({ type: 'share', text: [sum, line, dated].filter(Boolean).join('\n') });
+    });
+    // Checking for updates; once one is known the row brings its card back instead.
+    $('aboutCheck').addEventListener('click', () => {
+      if (updateReady) {
+        about.close();
+        $('updateCard').hidden = false;
+        showLabel();
+        scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      showNote('Checking…');
+      toApp({ type: 'checkUpdate' });
+    });
+  }
+
+  // ---- About, in the menu ----
+  // The page has the version (once the app has said it), the update check and the
+  // links. selfUpdates is off until the app says otherwise: Play builds and iPhones
+  // update through their store, so there the page has no check.
+  const about = $('aboutDlg');
+  let appVersion = '', selfUpdates = false, updateReady = false, versionTimer = 0;
+  // The app says which build it is. The website's copy is stamped with its version when it is published.
+  const WEB_VERSION = '1.19.1';
+  function showVersion() {
+    const v = appVersion || (WEB_VERSION.startsWith('__') ? '' : WEB_VERSION);
+    // A row of About's list: the word at the left, the number at the right in grey.
+    const word = document.createElement('span'), number = document.createElement('span');
+    word.textContent = 'Version';
+    number.textContent = v;
+    $('aboutVer').replaceChildren(word, number);
+    $('aboutVer').hidden = !v;
+  }
+  showVersion();
+  // While the update card shows, the menu's row stays About: the card says the rest.
+  function showLabel() {
+    const waiting = updateReady && $('updateCard').hidden;
+    $('version').textContent = waiting ? 'Update available' : 'About';
+    $('version').dataset.state = waiting ? 'available' : '';
+    if (updateReady) showNote('Available');
+  }
+  function showNote(text) {
+    clearTimeout(versionTimer);
+    $('aboutNote').textContent = text;
+  }
+  function markUpdateReady() {
+    updateReady = true;
+    showLabel();
+  }
+  // The page's name takes focus, never a row. The app hears of it as it does the
+  // picker, so Back closes it.
+  function openAbout() {
+    about.showModal();
+    $('aboutTitle').focus();
+    syncBack();
+  }
+  $('version').addEventListener('click', openAbout);
+  about.addEventListener('close', syncBack);
+  $('aboutClose').addEventListener('click', () => about.close());
+  about.addEventListener('click', e => { if (e.target === about) about.close(); });
+
+  // The app's Back gesture is the page's only while something is open over it: the
+  // menu, the currency picker, Settings or About. The app is told each time that
+  // changes (its "picker" message), and then asks bureauBack to close what is open.
+  function syncBack() {
+    toApp({ type: 'picker', open: !menu.hidden || dlg.open || about.open || settings.open });
+  }
+
+  // ---- More, top right ----
+  // The panel under the three dots: Settings, sharing (in the iPhone app) and
+  // About. Choosing a row puts the panel away, as does a tap anywhere else, or
+  // Escape.
+  const menu = $('menu');
+  function showMenu(on) {
+    menu.hidden = !on;
+    $('menuBtn').setAttribute('aria-expanded', String(on));
+    syncBack();
+  }
+  $('menuBtn').addEventListener('click', () => showMenu(menu.hidden));
+  menu.addEventListener('click', e => { if (e.target.closest('.menu-row')) showMenu(false); });
+  document.addEventListener('pointerdown', e => { if (!menu.hidden && !e.target.closest('#menu, #menuBtn')) showMenu(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { showMenu(false); $('menuBtn').focus(); } });
+
+  // The update card. The app sends: available (version, notes, size),
+  // downloading (progress 0..1), installing, and failed (message).
+  let updateVersion = '', updateSize = 0;
+  function showUpdate(m) {
+    const show = (id, on) => { $(id).hidden = !on; };
+    $('updateCard').hidden = false;
+    if (m.state === 'available') {
+      updateVersion = m.version || updateVersion;
+      updateSize = m.size > 0 ? m.size : updateSize;
+      const notes = Array.isArray(m.notes) ? m.notes.filter(n => typeof n === 'string' && n).slice(0, 5) : [];
+      $('updateNotes').replaceChildren(...notes.map(n => { const li = document.createElement('li'); li.textContent = n; return li; }));
+      show('updateNotes', notes.length > 0);
+    }
+    const sub = [`Bureau ${updateVersion}`, updateSize ? `${(updateSize / 1e6).toFixed(1)} MB` : ''].filter(Boolean).join(' · ');
+    const pct = Math.round(Math.max(0, Math.min(1, m.progress || 0)) * 100);
+    const view = {
+      available: { title: 'Update available', msg: '', actions: true, progress: false, go: 'Update' },
+      downloading: { title: 'Downloading update', msg: '', actions: false, progress: true },
+      installing: { title: 'Installing update', actions: false, progress: true, msg: 'Confirm on the next screen.' },
+      failed: { title: "Update didn't finish", msg: m.message || 'Something went wrong. Try again.', actions: true, progress: false, go: 'Try again' },
+    }[m.state];
+    if (!view) return;
+    $('updateTitle').textContent = view.title;
+    $('updateSub').textContent = sub;
+    $('updateMsg').textContent = view.msg;
+    show('updateMsg', !!view.msg);
+    show('updateActions', view.actions);
+    show('updateProgress', view.progress);
+    if (view.go) $('updateGo').textContent = view.go;
+    if (view.progress) {
+      const p = m.state === 'installing' ? 100 : pct;
+      $('updateBar').style.width = p + '%';
+      $('updatePct').textContent = p + '%';
+    }
+  }
+
+  // ---- interactions ----
+  let focused = 'from';   // the amount field the sign keys type into
+  for (const side of ['from', 'to']) {
+    const input = field(side);
+    // The input is only as wide as its text, so a tap anywhere in the amount area focuses it.
+    $(side + 'Wrap').addEventListener('click', e => { if (e.target !== input) input.focus(); });
+    // Only typing makes a field the one being edited: tapping the answer and away
+    // again must leave the amount you typed exactly as it was.
+    let before = '';
+    input.addEventListener('focus', () => {
+      focused = side;
+      before = input.value;
+      input.select();
+      // An iPhone drops a selection made while the keyboard is still coming up.
+      if (ios) setTimeout(() => { if (document.activeElement === input) input.setSelectionRange(0, input.value.length); });
+      showOps(true);
+    });
+    input.addEventListener('input', () => { state.edited = side; convert(); announce(); });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+    input.addEventListener('blur', () => {
+      showOps(false);
+      if (input.value === before) {
+        // Left untouched: an answer held back by a refresh catches up now.
+        if (answerBehind && side !== state.edited) convert();
+        return;
+      }
+      // Tidy what was typed (grouping, or the result of a sum) without rounding it.
+      const { value } = evaluate(input.value);
+      if (Number.isFinite(value) && value >= 0) {
+        // Coins keep what was typed without padding it to eight places.
+        const d = CRYPTO[state[side]] ? 2 : fractionDigits(state[side]);
+        input.value = nf({ minimumFractionDigits: d, maximumFractionDigits: Math.max(d, 8) }).format(value);
+        convert();
+      }
+    });
+  }
+
+  // Operator keys: only on touch screens, only while an amount is being edited.
+  const coarse = matchMedia('(pointer: coarse)');
+  let opsTimer = 0;
+  function showOps(on) {
+    clearTimeout(opsTimer);
+    if (on) { if (coarse.matches) $('ops').hidden = false; }
+    else opsTimer = setTimeout(() => { $('ops').hidden = true; }, 120);
+  }
+  // On the web the keyboard covers the page rather than shrinking it, so the keys
+  // go by what's still visible, and drop the gap for the home bar while it's up.
+  const seen = window.visualViewport;
+  function placeOps() {
+    const keyboard = Math.max(0, Math.round(innerHeight - seen.height - seen.offsetTop));
+    $('ops').style.bottom = `${keyboard}px`;
+    $('ops').style.paddingBottom = keyboard ? '2px' : '';
+  }
+  if (seen && (!app || ios)) { seen.addEventListener('resize', placeOps); seen.addEventListener('scroll', placeOps); }
+  $('ops').addEventListener('pointerdown', e => e.preventDefault());   // keep the keyboard up
+  $('ops').addEventListener('click', e => {
+    const b = e.target.closest('button[data-op]');
+    if (!b) return;
+    haptic('tick');
+    const input = field(focused);
+    if (document.activeElement !== input) input.focus();
+    let start = input.selectionStart ?? input.value.length, end = input.selectionEnd ?? input.value.length;
+    // The amount is selected on focus so typing replaces it; a sign carries it on.
+    if (start === 0 && end === input.value.length) start = end;
+    input.setRangeText(b.dataset.op, start, end, 'end');
+    input.dispatchEvent(new Event('input'));
+  });
+
+  function savePair() {
+    store.set('pair', { from: state.from, to: state.to });
+  }
+  function swap() {
+    closeAlert();
+    [state.from, state.to] = [state.to, state.from];
+    const f = field('from').value;
+    field('from').value = field('to').value;
+    field('to').value = f;
+    state.edited = other(state.edited);
+    savePair();
+    renderAll();
+    renderTrend();
+    slideLegs();
+    announce();
+  }
+  // The two rows trade places: each slides in from where the other was,
+  // and the arrows turn half a turn with them.
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let swapTurns = 0;
+  function slideLegs() {
+    $('swap').firstElementChild.style.transform = `rotate(${++swapTurns * 180}deg)`;
+    if (reduceMotion.matches || !Element.prototype.animate) return;
+    const legs = document.querySelectorAll('.leg');
+    const shift = legs[0].offsetHeight * 0.35;
+    legs.forEach((leg, i) => {
+      const from = i === 0 ? shift : -shift;
+      for (const el of leg.querySelectorAll('.pick, .amount-wrap')) {
+        el.animate(
+          [{ transform: `translateY(${from}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
+          { duration: 220, easing: 'cubic-bezier(.2, .7, .2, 1)' },
+        );
+      }
+    });
+  }
+  $('swap').addEventListener('click', () => { haptic(); swap(); });
+  // A tap always shows it's checking, joining a refresh already under way.
+  $('status').addEventListener('click', () => {
+    checking = true;
+    renderStatus();
+    loadRates();
+  });
+  // Settings opens from its row in the menu, and from the fee marked on the answer's card.
+  $('settingsBtn').addEventListener('click', openSettings);
+  $('fromFee').addEventListener('click', openSettings);
+  $('toFee').addEventListener('click', openSettings);
+  // The fee's field is typed like the amounts: what's there is selected on focus, so
+  // typing replaces it.
+  $('feeInput').addEventListener('focus', e => {
+    const input = e.target;
+    feeBefore = state.fee;
+    input.select();
+    // An iPhone drops a selection made while the keyboard is still coming up.
+    if (ios) setTimeout(() => { if (document.activeElement === input) input.setSelectionRange(0, input.value.length); });
+  });
+  // The fee applies as you type; one that can't be read (or over 20%) leaves the
+  // last good one, and shows in red until it can be.
+  $('feeInput').addEventListener('input', e => {
+    const n = BureauLib.parseFee(ascii(e.target.value), GROUP);
+    e.target.setAttribute('aria-invalid', String(!Number.isFinite(n)));
+    if (Number.isFinite(n) && n !== state.fee) setFee(n);
+  });
+  // Enter, or Done on the keyboard, leaves the field (Escape is the page's: see its cancel).
+  $('feeInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+  // Left, the field shows the fee in force. Left with something that can't be a fee in
+  // it (25, say, typed over 2.5: the 2 on the way was taken as one), the fee goes back
+  // to what it was before the field was touched, so what shows is what was meant.
+  $('feeInput').addEventListener('blur', e => {
+    if (e.target.getAttribute('aria-invalid') === 'true' && state.fee !== feeBefore) setFee(feeBefore);
+    e.target.value = state.fee ? fmtPct(state.fee) : '';
+    e.target.removeAttribute('aria-invalid');
+  });
+  $('alertBtn').addEventListener('click', () => ($('alertRow').hidden ? openAlert() : closeAlert()));
+  $('alertTarget').addEventListener('input', renderAlertHint);
+  $('alertTarget').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); setAlert(); } });
+  $('alertSet').addEventListener('click', setAlert);
+  $('alertRemove').addEventListener('click', removeAlert);
+  $('alertAllow').addEventListener('click', () => toApp({ type: 'notificationSettings' }));
+  // With no Back on an iPhone, a tap away from a field puts the keyboard down.
+  if (ios) document.addEventListener('pointerdown', e => {
+    const a = document.activeElement;
+    if (a && a.tagName === 'INPUT' && e.target !== a && !e.target.closest('input, label, .ops, .amount-wrap')) a.blur();
+  });
+  // The app's Back gesture calls this first: it closes Settings, the picker or About, and then the menu.
+  window.bureauBack = () => {
+    const page = [settings, dlg, about].find(d => d.open);
+    if (page) page.close();
+    else if (!menu.hidden) showMenu(false);
+    else return false;
+    syncBack();
+    return true;
+  };
+  $('range').addEventListener('click', e => {
+    const b = e.target.closest('button[data-days]');
+    if (!b || Number(b.dataset.days) === state.days) return;
+    haptic('tick');
+    state.days = Number(b.dataset.days);
+    store.set('days', state.days);
+    renderTrend();
+  });
+
+  // ---- picker ----
+  const dlg = $('picker');
+  let pickingSide = 'from';
+  function openPicker(side) {
+    pickingSide = side;
+    $('pickerSearch').value = '';
+    $('pickerClear').hidden = true;
+    renderPickerList('');
+    // With a mouse or keyboard you type at once. On a touch screen the keyboard would
+    // cover half the list, so the picker itself takes focus (a screen reader hears its
+    // name) and search waits for a tap.
+    const search = !coarse.matches;
+    dlg.autofocus = !search;
+    $('pickerSearch').autofocus = search;
+    dlg.showModal();
+    (search ? $('pickerSearch') : dlg).focus();
+    syncBack();
+  }
+  dlg.addEventListener('close', syncBack);
+  // An iPhone's keyboard covers the page rather than shrinking it, so while it is
+  // up the list ends with that much room and its last rows can be reached.
+  function padPicker() {
+    const keyboard = Math.max(0, Math.round(innerHeight - seen.height - seen.offsetTop));
+    $('pickerList').style.paddingBottom = dlg.open && keyboard ? `${keyboard + 12}px` : '';
+  }
+  if (seen && ios) {
+    seen.addEventListener('resize', padPicker);
+    seen.addEventListener('scroll', padPicker);
+    dlg.addEventListener('close', padPicker);
+  }
+  function itemButton(code, hint) {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.code = code;
+    if (!hint && CRYPTO[code] && state.rates && !(state.rates[code] > 0)) hint = 'no rate today';
+    const current = code === state[pickingSide];
+    if (current) b.setAttribute('aria-current', 'true');
+    const c = document.createElement('span'); c.className = 'c'; c.textContent = code;
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = nameOf(code);
+    if (hint) {
+      const h = document.createElement('span');
+      h.className = 'hint';
+      h.textContent = ` · ${hint}`;
+      n.append(h);
+    }
+    const t = document.createElement('span'); t.className = 'tick'; t.setAttribute('aria-hidden', 'true');
+    if (current) t.innerHTML = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 10.5 4 4 8-9"/></svg>';
+    b.append(c, n, t);
+    li.append(b);
+    return li;
+  }
+  function group(label, codes) {
+    if (!codes.length) return [];
+    const li = document.createElement('li');
+    li.className = 'group';
+    li.textContent = label;
+    return [li, ...codes.map(code => itemButton(code))];
+  }
+  function renderPickerList(q) {
+    const list = $('pickerList');
+    const all = currencies.length ? currencies : COMMON;
+    const typed = q.trim();
+    q = typed.toLowerCase();
+    if (!q) {
+      const recent = state.recent.filter(c => all.includes(c));
+      const common = COMMON.filter(c => all.includes(c) && !recent.includes(c));
+      const crypto = Object.keys(CRYPTO).filter(c => all.includes(c) && !recent.includes(c));
+      const rest = currencies.filter(c => !CRYPTO[c]);
+      list.replaceChildren(
+        ...group('Recent', recent),
+        ...group('Common', common),
+        ...group('Crypto', crypto),
+        ...group('All currencies', rest)
+      );
+      return;
+    }
+    const hits = all
+      .map(c => [c, BureauLib.searchScore(q, c, nameOf(c), placesOf(c))])
+      .filter(([, m]) => m)
+      .sort((a, b) => a[1].score - b[1].score);
+    if (!hits.length) {
+      const li = document.createElement('li');
+      li.className = 'group';
+      li.textContent = `Nothing matches “${typed}”`;
+      list.replaceChildren(li);
+      return;
+    }
+    list.replaceChildren(...hits.map(([c, m]) => itemButton(c, m.hint)));
+  }
+
+  // Country names for a currency, in this language and in English, plus
+  // everyday aliases (UK, USA, Dubai), so the picker finds THB from "Thailand".
+  let regionNames = null, regionNamesEn = null;
+  try { regionNames = new Intl.DisplayNames([locale], { type: 'region' }); } catch {}
+  try { regionNamesEn = new Intl.DisplayNames(['en'], { type: 'region' }); } catch {}
+  const placesCache = new Map();
+  function placesOf(code) {
+    if (placesCache.has(code)) return placesCache.get(code);
+    const places = new Set();
+    for (const region of BureauLib.regionsOf(code)) {
+      for (const dn of [regionNames, regionNamesEn]) {
+        try { const name = dn && dn.of(region); if (name && name !== region) places.add(name); } catch {}
+      }
+      for (const alias of BureauLib.REGION_ALIASES[region] || []) places.add(alias);
+    }
+    const list = [...places];
+    placesCache.set(code, list);
+    return list;
+  }
+  function choose(code) {
+    haptic();
+    const otherSide = other(pickingSide);
+    if (code === state[otherSide]) state[otherSide] = state[pickingSide];
+    state[pickingSide] = code;
+    state.recent = [code, ...state.recent.filter(c => c !== code)].slice(0, 5);
+    store.set('recent', state.recent);
+    savePair();
+    dlg.close();
+    closeAlert();
+    renderAll();
+    renderTrend();
+    announce();
+  }
+  $('pickFrom').addEventListener('click', () => openPicker('from'));
+  $('pickTo').addEventListener('click', () => openPicker('to'));
+  $('pickerClose').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', e => {
+    // A click outside the panel puts it away. On a phone the picker is the whole
+    // screen, so nothing is outside it: blank space under a short list does nothing.
+    if (e.target === dlg) {
+      const box = dlg.getBoundingClientRect();
+      if (e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom) dlg.close();
+      return;
+    }
+    const b = e.target.closest('button[data-code]');
+    if (b) choose(b.dataset.code);
+  });
+  $('pickerSearch').addEventListener('input', e => {
+    $('pickerClear').hidden = !e.target.value;
+    renderPickerList(e.target.value);
+  });
+  // The search's own clear button: it empties the field as typing would, and leaves the cursor in it.
+  $('pickerClear').addEventListener('click', () => {
+    $('pickerSearch').value = '';
+    $('pickerSearch').dispatchEvent(new Event('input'));
+    $('pickerSearch').focus();
+  });
+  $('pickerSearch').addEventListener('keydown', e => {
+    const first = $('pickerList').querySelector('button[data-code]');
+    if (e.key === 'Enter' && first) { e.preventDefault(); choose(first.dataset.code); }
+    if (e.key === 'ArrowDown' && first) { e.preventDefault(); first.focus(); }
+  });
+  $('pickerList').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const btns = [...$('pickerList').querySelectorAll('button[data-code]')];
+    const i = btns.indexOf(document.activeElement);
+    const next = e.key === 'ArrowDown' ? btns[i + 1] : (i <= 0 ? $('pickerSearch') : btns[i - 1]);
+    if (next) next.focus();
+  });
+
+  // ---- boot ----
+  const savedAmount = store.get('amount');
+  if (savedAmount && typeof savedAmount.value === 'string' && savedAmount.value) {
+    state.edited = savedAmount.side === 'to' ? 'to' : 'from';
+    // If that side's currency was withdrawn, the number meant the old money: start again at 100.
+    const moved = saved[state.edited] !== undefined && saved[state.edited] !== state[state.edited];
+    field(state.edited).value = moved ? fmtAmount(100, state[state.edited]) : savedAmount.value;
+  } else {
+    field('from').value = fmtAmount(100, state.from);
+  }
+  renderAll();
+  renderTrend();
+  toApp({ type: 'hello' });
+  loadRates();
+  setInterval(() => { if (!document.hidden) loadRates(); }, REFRESH_MS);
+  setInterval(renderStatus, 15_000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    if (Date.now() - state.fetchedAt > REFRESH_MS) loadRates();
+    renderStatus();
+  });
+  addEventListener('online', loadRates);
+  const scrubbing = () => !!$('trend').querySelector('.probe-dot:not([hidden])');
+  addEventListener('resize', () => { fitAll(); fitStatus(); if (!scrubbing()) fitAxis(); });
+  if (document.fonts) document.fonts.ready.then(() => { fitAll(); fitStatus(); if (!scrubbing()) fitAxis(); });
+})();
+</script>
+</body>
+</html>

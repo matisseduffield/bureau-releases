@@ -1,0 +1,15 @@
+{
+  "versionCode": 11901,
+  "versionName": "1.19.1",
+  "apk": "https://raw.githubusercontent.com/matisseduffield/bureau-releases/main/Bureau-v1.19.1.apk",
+  "size": 322736,
+  "sha256": "0a6c557f5f233660f1824a276c801b0ed0cd621114c19b66c649a246927a2c4e",
+  "publishedAt": "2026-11-18T06:38:52Z",
+  "notes": [
+    "Fixed amounts jumping a thousandfold when typing a decimal after four digits in some regions",
+    "The answer stays on screen while you type a sum",
+    "Tapping blank space in the currency list no longer closes it",
+    "Rates show sooner on a first launch with a slow connection",
+    "Amounts stay the same size and uncut at large text sizes"
+  ]
+}
